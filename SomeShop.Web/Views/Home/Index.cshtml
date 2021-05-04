@@ -1,0 +1,180 @@
+﻿@model SomeShop.Web.Models.HomeModels.IndexVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+@{
+    var brands = Model.Brands;
+    var randomBrands = Model.RandomBrands;
+    var newItems = Model.NewItems;
+    var saleItems = Model.SaleItems;
+}
+
+<!--Slider Section Start-->
+<div class="hero-section section position-relative">
+    <div class="hero-slider section">
+        <!--Hero Item start-->
+        <div class="hero-item bg-image" data-bg="assets/images/banners/bg-0.jpg">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="col-12">
+                            <!--Hero Content start-->
+                            <div class="hero-content-2 right">
+                                <h2 style="color:green !important;">Youth and beauty</h2>
+                                <a style="background-color:green !important;" href="@Url.Action("Index", "Shop")" class="btn">FIND</a>
+                            </div>
+                            <!--Hero Content end-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Hero Item end-->
+        <!--Hero Item start-->
+        <div class="hero-item bg-image" data-bg="assets/images/banners/bg-1.jpg">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="col-12">
+                            <!--Hero Content start-->
+                            <div class="hero-content-2 center">
+                                <h2>Environmentally friendly <br> cosmetics</h2>
+                                <a href="@Url.Action("Index", "Shop")" class="btn">FIND</a>
+                            </div>
+                            <!--Hero Content end-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Hero Item end-->
+        <!--Hero Item start-->
+        <div class="hero-item bg-image" data-bg="assets/images/banners/bg-2.jpg">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <!--Hero Content start-->
+                        <div class="hero-content-2 right">
+                            <h2 class="text-white">Variety of brands <br> in your hands</h2>
+                            <a href="@Url.Action("Index", "Shop")" class="btn">FIND</a>
+                        </div>
+                        <!--Hero Content end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Hero Item end-->
+    </div>
+</div>
+<!--Slider Section end-->
+<!--Product section start-->
+<div class="product-section section pt-100 pt-lg-80 pt-md-70 pt-sm-60 pt-xs-50 pb-55 pb-lg-35 pb-md-25 pb-sm-15 pb-xs-5">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section-title text-center mb-50 mb-xs-20">
+                    <h2>New items</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row product-slider">
+            @foreach (var product in newItems)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    @await Html.PartialAsync("~/Views/Shared/_ProductCard.cshtml", product)
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="product-section section">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section-title text-center mb-50 mb-xs-20">
+                    <h2>Sale</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row product-slider">
+            @foreach (var product in saleItems)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    @await Html.PartialAsync("~/Views/Shared/_ProductCard.cshtml", product)
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!--Product section end-->
+<!--Features section start-->
+<div class="features-section section pt-30 pt-lg-15 pt-md-0 pt-sm-0 pt-xs-15">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-1.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Fast shipping</h4>
+                        <p class="short-desc">We provide the fastest service and delivery</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-2.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Quality products</h4>
+                        <p class="short-desc">We guarantee the quality of products, which is our main goal</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-3.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Environmental friendliness</h4>
+                        <p class="short-desc">We try to work only with environmentally friendly products</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--Features section end-->
+<!--Brand section start-->
+<div class="brand-section section pb-100 pb-lg-80 pb-md-70 pb-sm-60 pb-xs-50 pt-30 pt-lg-15 pt-md-0 pt-sm-0 pt-xs-15">
+    <div class="container text-center">
+        <div class="section-title text-center mb-15">
+            <h2>Brands</h2>
+        </div>
+        <div class="row">
+            <div class="brand-slider section">
+                @foreach (var brand in brands)
+                {
+                    <!-- Single Brand Start -->
+                    <div class="col">
+                        <div class="single-brand">
+                            <div class="brand-image">
+                                <a href="@Url.Action("Index", "Shop", new { brandId = brand.Id})"><img src="~/@BrandLogoImage(brand.Logo)" alt="@brand.Name"></a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Single Brand End -->
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!--Brand section end-->

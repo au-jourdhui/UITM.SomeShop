@@ -1,0 +1,398 @@
+﻿@model SomeShop.Web.Areas.Admin.Models.ProductsModel.ProductVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+@{
+    int id;
+}
+<style>
+    hr {
+        margin: 0px;
+    }
+
+    label {
+        margin: 0px;
+        font-weight: 600;
+    }
+
+    .custom-file-label::after {
+        content: "Select" !important;
+    }
+
+    .product-image-overlay {
+        padding: 5px 7px;
+    }
+</style>
+<div class="container">
+    <input type="hidden" id="productId" value="@Model.ProductId" />
+    <!-- Name  -->
+    <div class="form-group">
+        <label for="product-name">Name<span class="text-danger">*</span>:</label>
+        <input type="text" class="form-control" id="product-name" placeholder="Name..." value="@Model.Name">
+    </div>
+    <!-- Name -->
+    <!-- Description -->
+    <div class="form-group">
+        <label for="product-description">Description<span class="text-danger">*</span>:</label>
+        <textarea class="form-control" id="product-description" rows="3">@Model.Description</textarea>
+    </div>
+    <!-- Description End -->
+    <!-- Brand -->
+    <div class="form-group">
+        <label for="product-brand">Brand<span class="text-danger">*</span>:</label>
+        <select class="form-control" id="product-brand">
+            @foreach (var brand in Model.Brands)
+            {
+                <option value="@brand.Id" @(brand.Id == Model.BrandId ? " selected" : null)>@brand.Name</option>
+            }
+        </select>
+    </div>
+    <!-- Brand End -->
+    <!-- Categories -->
+    <div class="form-group" id="product-categories">
+        <label>Categories:</label>
+        <hr />
+        @{
+            id = 0;
+            @foreach (var category in Model.Categories)
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" accept="image/png, image/jpeg" type="checkbox" value="@category.Id" id="category_@(id)" @(Model.SelectedCategories.Any(x => x == category.Id) ? " checked" : null)>
+                    <label class="form-check-label" for="category_@(id++)">@category.Name</label>
+                </div>
+            }
+        }
+    </div>
+    <!-- Categories End -->
+    @if (Model.ProductId > 0)
+    {
+        <!-- Product Images -->
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Pictures</span>
+                </div>
+                <div class="custom-file">
+                    <input multiple type="file" class="custom-file-input" id="product-images" custom-file-label="Browse">
+                    <label class="custom-file-label" for="product-images">...</label>
+                </div>
+            </div>
+            <div id="images-section" class="row mt-1">
+                @foreach (var image in Model.ProductImages)
+                {
+                    <div class="product-image col-6 col-md-4 col-lg-3" data-image-id="@image.Id">
+                        <div class="card">
+                            <img src="~/@ProductImage(image.Image)" class="card-img" alt="@image.Image">
+                            <div class="card-img-overlay product-image-overlay">
+                                <button type="button" class="close product-image-delete">
+                                    <span class="text-danger">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <!-- Product Images End -->
+        <!-- Optional Parameters -->
+        <div class="form-group mt-5">
+            <div class="row">
+                <div class="col">
+                    <label>Specifications:</label>
+                </div>
+                <div class="col text-right">
+                    <button class="btn btn-sm text-left btn-info" id="add-new-item">Add</button>
+                </div>
+            </div>
+            <hr />
+            @{
+                id = 0;
+                @foreach (var parameter in Model.OptionalParameters)
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input specification" data-id="@parameter.Id" data-name="@parameter.Name"
+                               type="checkbox" value="@parameter.Id" id="parameter_@(id)"
+                               @(Model.SelectedOptionalParameters.Any(x => x == parameter.Id) ? " checked" : null)>
+                        <label class="form-check-label" for="parameter_@(id++)">@parameter.Name</label>
+                    </div>
+                }
+            }
+            <hr />
+        </div>
+        <!-- Optional Parameters End -->
+        <!-- Items -->
+        <div class="row" id="product-items-section">
+            @foreach (var item in Model.Items)
+            {
+                <div class="col-lg-4 col-md-6 col-12 item-section" data-item-id="@item.ItemId">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <button type="button" class="close item-delete">
+                                <span class="text-danger">&times;</span>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row" id="parameters-section" data-price="@item.Price">
+                                @foreach (var parameter in item.OptionalParametersForItems)
+                                {
+                                    <div class="col-12 mb-2">
+                                        <div class="input-group parameter-section" data-parameter-id="@parameter.OptionalParameterId">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">@parameter.OptionalParameterName</span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="@parameter.OptionalParameterName..." value="@parameter.OptionalParameterValue">
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="form-row" id="price-section" data-price="@item.Price">
+                                <div class="col-lg-6 col-md-12 mb-2">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">New price</span>
+                                        </div>
+                                        <input type="number" step="0.1" min="0" class="form-control item-price" placeholder="Price..." value="@item.Price">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-12 mb-2">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Old price</span>
+                                        </div>
+                                        <input type="number" step="0.1" readonly class="form-control old-item-price" value="@item.OldPrice">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- Items End -->
+    }
+    <div class="row mt-3">
+        <div class="col text-right">
+            <button class="btn text-right btn-success" id="product-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var productId = $('#productId').val();
+        function updateInfo(productId) {
+            $.ajax({
+                method: 'GET',
+                url: '@Url.Action("_Product", "Products", new { area = "Admin" })',
+                data: { id: productId },
+                success: function (html) {
+                    $('#modal-large .modal-body').html(html);
+                }
+            });
+        }
+
+        $('#add-new-item').click(function () {
+            var optionalParameters = [];
+            $('.form-check-input.specification:checked').each(function (i, el) {
+                _el = $(el);
+                optionalParameters.push(_el.data('id'));
+            });
+            debugger;
+            $.ajax({
+                method: 'POST',
+                url: '@Url.Action("AddNewItem", "Products")',
+                data: { productId: productId, optionalParameters: optionalParameters },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Success',
+                            html: data.message || "New specification added successfully!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        updateInfo(productId);
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Error',
+                            html: data.message || "An unexpected error has occurred!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+        });
+
+        $('.item-delete').click(function () {
+            var itemId = $(this).parents('.item-section').data('item-id');
+            $.ajax({
+                method: 'POST',
+                url: '@Url.Action("DeleteItem", "Products")',
+                data: { itemId: itemId },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Deleted',
+                            html: data.message || "Successfully removed!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        updateInfo(productId);
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Error',
+                            html: data.message || "An unexpected error has occurred!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+        });
+
+        $('.form-check-input.specification').change(function () {
+            var _this = $(this);
+            var optionalParameterId = _this.data('id');
+            var toDelete = !_this.is(':checked');
+            Swal.fire({
+                type: 'info',
+                title: 'Change',
+                html: "Add a new product specification?",
+                showCloseButton: true,
+                showCancelButton: true,
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("UpdateSpecifications", "Products")',
+                        data: { productId: productId, optionalParameterId: optionalParameterId, toDelete: toDelete },
+                        success: function (data) {
+                            if (data.success) {
+                                Swal.fire({
+                                    type: 'success',
+                                    title: 'Updated',
+                                    html: data.message || "Information is being reloaded!",
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                                updateInfo(productId);
+                            }
+                            else {
+                                Swal.fire({
+                                    type: 'error',
+                                    title: 'Error',
+                                    html: data.message || "An unexpected error has occurred!",
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                            }
+                        }
+                    })
+                } else {
+                    _this.prop("checked", toDelete);
+                }
+            });
+        });
+        $('#product-save').click(function () {
+            var isUpdateList = (!!$('#productId').val());
+            var data = {};
+            data.productId = productId;
+            data.name = $('#product-name').val();
+            data.description = $('#product-description').val();
+            data.brandId = $('#product-brand').val();
+            data.selectedCategories = [];
+            $('#product-categories .form-check input[type="checkbox"]:checked').each(function (i, el) {
+                data.selectedCategories.push($(el).val());
+            });
+            data.items = [];
+            $('.item-section').each(function (i, el) {
+                var item = {
+                    itemId: $(this).data('item-id'),
+                    price: $(this).find('input.item-price').val()
+                };
+                data.items.push(item);
+                item.optionalParametersForItems = [];
+                $(el).find('#parameters-section .parameter-section').each(function (par_i, par_el) {
+                    var parameter = {
+                        optionalParameterId: $(par_el).data('parameter-id'),
+                        optionalParameterValue: $(par_el).find('input.form-control').val()
+                    };
+                    item.optionalParametersForItems.push(parameter);
+                });
+            });
+            $.ajax({
+                method: 'POST',
+                url: '@Url.Action("SaveProduct", "Products")',
+                data: data,
+                success: function (data) {
+                    if (data.success) {
+                        productId = data.productId;
+                        $('#productId').val(productId);
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Saved',
+                            html: data.message || "Saved successfully!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        updateInfo(productId);
+                        if (isUpdateList) {
+                            search();
+                        }
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Error',
+                            html: data.message || "An unexpected error has occurred!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+                        
+            @if (Model.ProductId > 0)
+            {
+                @:var files = $('#product-images')[0].files;
+                @:var formData = new FormData();
+                @:for (var i = 0; i != files.length; i++)
+                @:{
+                @:    formData.append("files", files[i]);
+                @:}
+                @:$.ajax({
+                @:method: 'POST',
+                @:url: '@Url.Action("UploadProductImages", "Products")?id=@Model.ProductId&name=' + data.name,
+                @:contentType: false,
+                @:processData: false,
+                @:data: formData,
+                @:success: function(data) {
+                @:        if (data.success)
+                @:        {
+                @:            Swal.fire({
+                @:            type: 'success',
+                @:            title: 'Added',
+                @:            html: "Images added successfully",
+                @:            showConfirmButton: false,
+                @:            timer: 2000
+                @:            });
+                @:        }
+                @:        else
+                @:        {
+                @:            Swal.fire({
+                @:            type: 'error',
+                @:            title: 'Error',
+                @:            html: data.message || "An unexpected error has occurred!",
+                @:            showConfirmButton: false,
+                @:            timer: 2000
+                @:            });
+                @:        }
+                @:    }
+                @:});
+            }            
+        });
+    });
+
+</script>

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<SomeShop.DAL.Models.StoredProcedureModels.GetOrdersInfo_Admin_Result>
+
+<table class="table table-sm table-hover table-centered for-data-table">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+            <th scope="col">City</th>
+            <th scope="col">Status</th>
+            <th scope="col">Delivery</th>
+            <th scope="col">Payment</th>
+            <th scope="col">Created</th>
+            <th scope="col">Modified</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model?.Count() > 0)
+        {
+            @foreach (var order in Model)
+            {
+                <tr class="order-row pointer" data-order-id="@order.OrderId" data-is-deleted="@order.IsDeleted">
+                    <th scope="row">@order.OrderId</th>
+                    <td>@order.Customer</td>
+                    <td>@order.ItemsCount</td>
+                    <td>@order.TotalSum</td>
+                    <td>@order.OrderCity</td>
+                    <td>@order.Status</td>
+                    <td>@order.OrderDeliveryType</td>
+                    <td>@order.OrderPaymentType</td>
+                    <td>@order.DateCreated.ToShortDateString()</td>
+                    <td>@order.DateModified.ToShortDateString()</td>
+                    <td class="order-delete-restore"><i class="pointer fa @(order.IsDeleted ? "fa-trash-restore-alt text-success" : "fa-trash-alt text-danger")"></i></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<script>$('.for-data-table').DataTable();</script>

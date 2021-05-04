@@ -1,0 +1,166 @@
+﻿@model SomeShop.Web.Models.HomeModels.AboutVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+<!-- Page Banner Section Start -->
+<div class="container-fluid bg-light py-5 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="page-banner text-left">
+                    <h2>About</h2>
+                    <ul class="page-breadcrumb">
+                        <li><a href="@Url.Action("Index", "Home" )">Home</a></li>
+                        <li>About</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!--About Us Area Start-->
+<div class="about-us-area section pt-90 pt-lg-70 pt-md-60 pt-sm-50 pt-xs-45 pb-70 pb-lg-50 pb-md-60 pb-sm-60 pb-xs-50">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 col-12">
+                <!--About Us Image Start-->
+                <div class="about-us-img-wrapper mb-30 mb-xs-15">
+                    <div class="about-us-image img-full">
+                        <a href="#"><img src="~/assets/images/about/about-1.png" alt=""></a>
+                    </div>
+                </div>
+                <!--About Us Image End-->
+            </div>
+            <div class="col-lg-6 col-12">
+                <!--About Us Content Start-->
+                <div class="about-us-content pl-30 pl-md-0 pl-sm-0 pl-xs-0">
+                    <span>@GlobalVariables.SiteSettings.Name</span>
+                    <h2>Providing the best cosmetics to our clients</h2>
+                    <p>No matter how old a person is, his skin needs care. Cleanliness and smoothness of the skin are indicators of a healthy face, so it is very important to take care of yourself. The most important point is proper nutrition, but cosmetics will help maintain youth and health.</p>
+                </div>
+                <!--About Us Content End-->
+            </div>
+        </div>
+    </div>
+</div>
+<!--About Us Area End-->
+@if (Model.Product != null)
+{
+    <!-- Banner section start -->
+    <div class="banner-section section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-4 col-12 m-auto text-center">
+                    <img src="~/@ProductImage(Model.Product.Image)" alt="@Model.Product.Name" />
+                </div>
+                <div class="col-lg-8 col-12">
+                    <!-- Single Banner Start -->
+                    <div class="single-banner-item pt-100 pt-md-80 pt-sm-70 pt-xs-50 pb-120 pb-md-100 pb-sm-90 pb-xs-50 mb-30">
+                        <div class="sp-banner-content pl-3">
+                            <span class="normat-text">Price reduced by <b class="text-danger">@Model.Product.Discount%</b></span>
+                            <h2 class="title" style="overflow-wrap:break-word;">@Model.Product.Name</h2>
+                            <span class="normat-text">Hurry up - the offer is limited!</span>
+                            <a href="@Url.Action("Product", "Shop", new { id = Model.Product.ProductId })">BUY</a>
+                        </div>
+                    </div>
+                    <!-- Single Banner End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Banner section End -->
+}
+<!--Features section start-->
+<div class="features-section section pt-30 pt-lg-15 pt-md-0 pt-sm-0 pt-xs-15">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-1.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Fast shipping</h4>
+                        <p class="short-desc">We provide the fastest service and delivery</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-2.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Quality products</h4>
+                        <p class="short-desc">We guarantee the quality of products, which is our main goal</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <!-- Single Feature Start -->
+                <div class="single-feature mb-30">
+                    <div class="feature-image">
+                        <img src="~/assets/images/icons/feature-3.png" class="img-fluid" alt="">
+                    </div>
+                    <div class="feature-content text-center">
+                        <h4 class="title">Environmental friendliness</h4>
+                        <p class="short-desc">We try to work only with environmentally friendly products</p>
+                    </div>
+                </div>
+                <!-- Single Feature End -->
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--Features section end-->
+@if (Model.Brands?.Count() > 0)
+{
+    <!--About Us Brands Start-->
+    <div class="about-us-team-area section pt-65 pt-lg-45 pt-md-35 pt-sm-20 pt-xs-15 pb-70 pb-lg-50 pb-md-40 pb-sm-30 pb-xs-20">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="section-title text-center mb-40 mb-xs-20">
+                        <h2>Brands</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var brand in Model.Brands)
+                {
+                    <!-- Brand Info Start-->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="single-team mb-30">
+                            <div class="team-image img-full" style="height: 300px; background-image: url('../@BrandBackgroundImage(brand.BackgroundImage)'); background-repeat: no-repeat; background-position: center; background-size: 75%;">
+                            </div>
+                            <div class="team-content">
+                                <div class="team-hover-info">
+                                    <h2><a href="@Url.Action("Index", "Shop", new { brandId = brand.Id })">@brand.Name</a></h2>
+                                    <ul class="team-social">
+                                        <li><span class="text-white country-producer" data-toggle="tooltip"><i class="fa fa-flag"></i> @brand.Country</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Brand Info End-->
+                }
+            </div>
+        </div>
+    </div>
+    <!--About Us Brands End-->
+}
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('.country-producer').tooltip({
+                title: "Producing country", placement: "bottom"
+            });
+        });
+    </script>
+}

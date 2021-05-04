@@ -1,0 +1,270 @@
+﻿@model SomeShop.Web.Models.ShopModels.ProductVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+@using static SomeShop.Web.Extensions.StringExtensions
+
+@{
+    var currentProduct = Model.Product;
+    var products = Model.Products;
+    var images = Model.ProductImages;
+    var categories = Model.Categories;
+    var parameters = Model.ItemsWithParameters;
+    var currentParameter = Model.ItemsWithParameters.FirstOrDefault();
+}
+<input type="hidden" id="selectedItemId" name="selectedItemId" value="@currentParameter.ItemId" />
+<!-- Page Banner Section Start -->
+<div class="container pt-60">
+    <div class="page-banner text-left">
+        <h2>@Model.Product.Name</h2>
+        <ul class="page-breadcrumb">
+            <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li>@Model.Product.Name</li>
+        </ul>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!-- Single Product Section Start -->
+<div class="single-product-section section pt-60 pt-lg-40 pt-md-30 pt-sm-20 pt-xs-25 pb-100 pb-lg-80 pb-md-40 pb-sm-30 pb-xs-20">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="shop-area">
+                    <div class="row">
+                        <!-- Product Details Left -->
+                        <div class="col-md-6 pr-35 pr-lg-15 pr-md-15 pr-sm-15 pr-xs-15">
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="product-details-nav">
+                                        @if (images?.Count() > 0)
+                                        {
+                                            foreach (var image in images)
+                                            {
+                                                <div class="sm-image"><img src="~/@ProductImage(image.Image)" alt="@($"{currentProduct.Name} {image.Image}")"></div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="sm-image"><img src="~/@NoImage" alt="No picture"></div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-10">
+                                    <div class="product-details-left">
+                                        <div class="product-details-images tf-element-carousel">
+                                            @if (images?.Count() > 0)
+                                            {
+                                                foreach (var image in images)
+                                                {
+                                                    <div class="lg-image">
+                                                        <img src="~/@ProductImage(image.Image)" alt="@($"{currentProduct.Name} {image.Image}")">
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="lg-image">
+                                                    <img src="~/@NoImage" alt="No picture">
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (parameters?.Count() > 0 && parameters.Any(x => !string.IsNullOrWhiteSpace(x.Parameters)))
+                            {
+                                <div class="row pt-30 pt-lg-20 pt-md-20 pt-sm-10 pt-xs-15">
+                                    <div class="col">
+                                        <div class="common-sidebar-widget">
+                                            <h3 class="sidebar-title">Item parameters</h3>
+                                            <ul class="sidebar-tag" id="itemParameters">
+                                                @foreach (var parameter in parameters)
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(parameter.Parameters))
+                                                    {
+                                                        <li>
+                                                            <span class="@(parameter == currentParameter ? "active" : "")" data-item="@parameter.ItemId" data-price="@parameter.Price" data-old-price="@parameter.OldPrice?.ToString()">
+                                                                @parameter.Parameters
+                                                            </span>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <!--Product Details Left -->
+                        <!--Product Details Content Start-->
+                        <div class="col-md-6">
+                            <div class="product-details-content">
+                                <h2>@Model.Product.Name</h2>
+                                <hr />
+                                <div class="single-product-price">
+                                    <span class="price new-price@(currentParameter.OldPrice.HasValue ? " text-danger" : "")" id="item-price">@currentParameter.Price$</span>
+                                    <span class="regular-price" id="item-old-price">@(currentParameter.OldPrice.HasValue ? $"{currentParameter.OldPrice.Value}$" : "" )</span>
+                                </div>
+                                <div class="product-description">
+                                    <p>@Model.Product.Description.Cut(100)...</p>
+                                </div>
+                                <div class="single-product-quantity">
+                                    <div class="add-quantity">
+                                        <div class="product-quantity">
+                                            <input value="1" type="number" min="1">
+                                        </div>
+                                        <div class="add-to-link">
+                                            <button class="btn add-to-cart-quantity-btn"><i class="fa fa-shopping-bag"></i>To cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="wishlist-compare-btn">
+                                    <a href="#" class="wishlist-btn@(Model.Favourite ? " active" : null)" data-product-id="@Model.Product.Id">In favourites</a>
+                                </div>
+                                <div class="product-meta">
+                                    <span class="posted-in">
+                                        Categories:
+                                        @{
+                                            var isFirst = false;
+                                            foreach (var category in categories)
+                                            {
+                                                @if (isFirst)
+                                                {
+                                                    @:,
+                                                }
+                                                <a href="@Url.Action("Index", "Shop", new { categoryId = category.Id })">@category.Name</a>
+                                                isFirst = true;
+                                            }
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Product Details Content End-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Single Product Section End -->
+<!--Product Description Review Section Start-->
+<div class="product-description-review-section section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="product-review-tab section">
+                    <!--Description Tab Menu Start-->
+                    <ul class="nav dec-and-review-menu">
+                        <li>
+                            <a class="active" data-toggle="tab" href="#description">Description</a>
+                        </li>
+                    </ul>
+                    <!--Description Tab Menu End-->
+                    <!--Description Tab Content Start-->
+                    <div class="tab-content product-review-content-tab" id="myTabContent-4">
+                        <div class="tab-pane fade active show" id="description">
+                            <div class="single-product-description">
+                                <p class="text-justify">
+                                    @Model.Product.Description
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Description Tab Content End-->
+            </div>
+        </div>
+    </div>
+</div>
+<!--Product Description Review Section Start-->
+<!--Product section start-->
+<div class="product-section section pt-100 pt-lg-80 pt-md-70 pt-sm-60 pt-xs-50 pb-55 pb-lg-35 pb-md-25 pb-sm-15 pb-xs-5">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section-title text-center mb-50 mb-xs-20">
+                    <h2>Other products</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row product-slider">
+            @foreach (var product in products)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    @await Html.PartialAsync("~/Views/Shared/_ProductCard.cshtml", product)
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!--Product section end-->
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var itemParameters = $('#itemParameters > li span');
+            var selectedItemInput = $('input[name="selectedItemId"]');
+            var itemPriceLabel = $('#item-price');
+            var itemOldPriceLabel = $('#item-old-price');
+            itemParameters.click(function () {
+                itemParameters.removeClass('active');
+                $(this).addClass('active');
+                var id = $(this).data('item');
+                var price = $(this).data('price');
+                var oldPrice = $(this).data('old-price');
+                selectedItemInput.val(id);
+                itemPriceLabel.text(price + '$');
+                if (oldPrice) {
+                    itemOldPriceLabel.text(oldPrice + '$');
+                } else {
+                    itemOldPriceLabel.text('');
+                }
+            });
+
+            $('.product-details-images').slick({
+                arrows: false,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                dots: false,
+                infinite: true,
+                swipe: false,
+                swipeToSlide: false,
+                asNavFor: '.product-details-nav'
+            });
+
+            $('.product-details-nav').slick({
+                arrows: false,
+                slidesToShow: @(images.Count() > 4 ? 4 : images.Count() > 0 ? images.Count() : 1),
+                slidesToScroll: 1,
+                vertical: true,
+                verticalSwiping: true,
+                dots: false,
+                focusOnSelect: true,
+                infinite: true,
+                asNavFor: '.product-details-images',
+            });
+
+            $('.add-to-cart-quantity-btn').click(function () {
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Shop")',
+                    method: 'POST',
+                    data: { itemId: $('#selectedItemId').val(), quantity: $('.product-quantity > input[type="number"]').val() },
+                    success: function (data) {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success',
+                                type: 'success',
+                                html: data.message
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                type: 'error',
+                                html: data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,40 @@
+﻿@model SomeShop.Web.Models.ShopModels.CartVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+
+<!--Mini Cart Dropdown Start-->
+<div class="header-cart">
+    @if (Model.CartItems?.Count() > 0)
+    {
+        <ul class="cart-items">
+            @foreach (var item in Model.CartItems)
+            {
+                <li class="single-cart-item">
+                    <div class="cart-img">
+                        <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })"><img src="~/@ProductImage(item.Image)" alt="@item.Name"></a>
+                    </div>
+                    <div class="cart-content">
+                        <h5 class="product-name">
+                            <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })">@item.Name</a>
+                        </h5>
+                        <span class="product-price">@item.Price$</span>
+                        <span class="product-quantity">@item.Quantity ×</span>
+                        <span class="product-price font-weight-bold">@item.Total$</span>
+                    </div>
+                </li>
+            }
+        </ul>
+        <div class="cart-total">
+            <h5>Cost of goods: <span class="float-right">@Model.Sum$</span></h5>
+            <h5>Total: <span class="float-right">@Model.Sum$</span></h5>
+        </div>
+    }
+    else
+    {
+        <p class="lead">Cart is empty...</p>
+    }
+    <div class="cart-btn">
+        <a href="@Url.Action("Cart", "Shop")">Shopping cart</a>
+        <a href="@Url.Action("Checkout", "Shop")">Checkout</a>
+    </div>
+</div>
+<!--Mini Cart Dropdown End-->

@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@GlobalVariables.SiteSettings.Name - Enter</title>
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: rgba(255, 193, 7, 0.6);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(255, 193, 7, 0.6);
+            outline: 0 none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-10 col-md-8 col-lg-6 col-xl-5">
+                <div class="card shadow p-3">
+                    <div>
+                        <div class="text-center">
+                            <img class="mb-4 img-thumbnail" src="~/assets/images/logo.png" style="width:auto">
+                        </div>
+                        <div class="form-label-group mt-1">
+                            <label for="inputLogin">Login</label>
+                            <input type="text" id="inputLogin" class="form-control" placeholder="Login..." required autofocus>
+                        </div>
+                        <div class="form-label-group mt-1">
+                            <label for="inputPassword">Password</label>
+                            <input type="password" id="inputPassword" class="form-control" placeholder="Password..." required>
+                        </div>
+                        <button class="btn btn-outline-warning btn-block mt-2" type="submit" id="login">Log in</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-10 col-md-8 col-lg-6 col-xl-5">
+                <p class="mt-5 mb-3 text-muted text-center">
+                    &copy;@GlobalVariables.SiteSettings.Name @DateTime.Now.Year
+                    <br />
+                    Created by <a class="text-dark" href="mailto:petitefille0910@gmail.com">Antoniuk K.</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+    <script>
+        $(document).ready(function () {
+            $('#login').click(function () {
+                $.ajax({
+                    url: '@Url.Action("Login", "Home")',
+                    method: 'POST',
+                    data: { login: $('#inputLogin').val(), password: $('#inputPassword').val() },
+                    success: function (data) {
+                        if (data.success) {
+                            debugger;
+                            Swal.fire({
+                                type: 'success',
+                                title: 'You are logged in!',
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(function () {
+                                window.location.replace("@Url.Action("Index", "Products", new { area = "Admin" })");
+                            });
+                        } else {
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Error',
+                                html: data.message,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

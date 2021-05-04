@@ -1,0 +1,139 @@
+﻿<div class="input-group my-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon">Search</span>
+    </div>
+    <input id="product-search" type="text" class="form-control" placeholder="Start typing to search..." aria-describedby="basic-addon">
+    <button class="ml-1 btn btn-success" id="add-new-product">Add</button>
+</div>
+<div id="product-list" class="table-responsive"></div>
+
+<div id="modal-large" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    function search(value) {
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("_ProductList", "Products", new { area = "Admin" })',
+            data: { search: value },
+            success: function (html) {
+                $('#product-list').html(html);
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        activeLink('products-link');
+
+        var searchTimer;
+        search();
+
+        $('#add-new-product').click(function () {
+            $.ajax({
+                method: 'GET',
+                url: '@Url.Action("_Product", "Products", new { area = "Admin" })',
+                success: function (html) {
+                    $('#modal-large .modal-header .modal-title').html('Item addition');
+                    $('#modal-large .modal-body').html(html);                    
+                    $('#modal-large').modal('show');
+                }
+            });
+        });
+        $('.product-row').click(function () {
+            var id = $(this).data('product-id');
+            window.location.replace('@Url.Action("Index", "Products", new { area = "Admin" })?id=' + id);
+        });
+        $('#product-search').on('keyup', function () {
+            var value = $('#product-search').val();
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function () {
+                search(value);
+            }, 500);
+        });
+        $('#product-list').on('click', '.product-row td:not(.product-delete-restore)', function () {
+            var _this = $(this).parent();
+            var id = _this.data('product-id');
+            var product = _this.data('product-name');
+            $.ajax({
+                method: 'GET',
+                url: '@Url.Action("_Product", "Products", new { area = "Admin" })',
+                data: { id: id },
+                success: function (html) {
+                    $('#modal-large .modal-header .modal-title').html(product);
+                    $('#modal-large .modal-body').html(html);
+                    $('#images-section .product-image .product-image-overlay .product-image-delete').off('click').click(function () {
+                        var productImage = $(this).parents('.product-image');
+                        var id = productImage.data('image-id');
+                        if (!!id) {
+                            $.ajax({
+                                url: '@Url.Action("RemoveProductImage", "Products", new { area = "Admin" })',
+                                method: 'POST',
+                                data: { id: id },
+                                success: function (data) {
+                                    if (!!data.success) {
+                                        productImage.remove();
+                                    }
+                                    else {
+                                        Swal.fire({
+                                            type: 'error',
+                                            title: 'Error',
+                                            text: 'An error occurred while removing!',
+                                            showConfirmButton: false,
+                                            timer: 2000
+                                        });
+                                    }
+                                }
+                            });
+                        } else {
+                            productImage.remove();
+                        }
+                    });
+                    $('#modal-large').modal('show');
+                }
+            });
+        });
+
+        $('#product-list').on('click', '.product-delete-restore', function () {
+            var _this = $(this);
+            var id = _this.parent().data('product-id');
+            $.ajax({
+                url: '@Url.Action("DeleteOrRestoreProduct", "Products", new { area = "Admin" })',
+                method: 'POST',
+                data: { id: id },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Success',
+                            text: data.isDeleted ? 'The item has been successfully deleted!' : 'The item has been successfully restored!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        _this.find('i').removeClass('fa-trash-restore-alt text-success fa-trash-alt text-danger').addClass(data.isDeleted ? 'fa-trash-restore-alt text-success' : 'fa-trash-alt text-danger');                    
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Error',
+                            text: 'Error occurred while removing / restoring!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            })
+        });
+    });
+    </script>
+}

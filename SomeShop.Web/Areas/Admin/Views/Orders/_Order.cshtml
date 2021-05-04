@@ -1,0 +1,272 @@
+﻿@model SomeShop.Web.Areas.Admin.Models.OrderModels.OrderVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+@{
+}
+<div class="container">
+    <input type="hidden" id="order-id" value="@Model.OrderId" />
+    <input type="hidden" id="user-id" value="@Model.UserId" />
+    <!-- Info Start -->
+    <div class="form-row" id="order-info">
+        <div class="form-group col-md-6 col-12">
+            <label for="firstName">First Name:</label>
+            <input type="text" class="form-control" id="firstName" readonly value="@Model.FirstName">
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label for="lastName">Last Name:</label>
+            <input type="text" class="form-control" id="lastName" readonly value="@Model.LastName">
+        </div>
+        <div class="form-group col-lg-6 col-md-12 col-12">
+            <label for="address">Address:</label>
+            <input type="text" class="form-control" id="address" readonly value="@Model.Address">
+        </div>
+        <div class="form-group col-lg-3 col-md-6 col-12">
+            <label for="city">City:</label>
+            <input type="text" class="form-control" id="city" readonly value="@Model.City">
+        </div>
+        <div class="form-group col-lg-3 col-md-6 col-12">
+            <label for="region">District:</label>
+            <input type="text" class="form-control" id="region" readonly value="@Model.Region">
+        </div>
+        <div class="form-group col-md-8 col-12">
+            <label for="email">Email:</label>
+            <input type="text" class="form-control" id="email" readonly value="@Model.Email">
+        </div>
+        <div class="form-group col-md-4 col-12">
+            <label for="phone">Phone:</label>
+            <input type="text" class="form-control" id="phone" readonly value="@Model.Phone">
+        </div>
+    </div>
+    <div class="btn-group-toggle text-right" data-toggle="buttons">
+        <label class="btn btn-outline-dark">
+            <input type="checkbox" autocomplete="off" id="edit-order-info" />
+            <i class="fa fa-pen"></i>
+        </label>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-lg-4 col-md-12">
+            <label for="orderStatusId">Status:</label>
+            <select class="form-control" id="orderStatusId">
+                @foreach (var status in Model.OrderStatuses)
+                {
+                    <option value="@status.Id" @(status.Id == Model.OrderStatusId ? " selected" : null)>@status.Status</option>
+                }
+            </select>
+        </div>
+        <div class="form-group col-lg-4 col-md-12">
+            <label for="orderPaymentTypeId">Payment type:</label>
+            <select class="form-control" id="orderPaymentTypeId">
+                @foreach (var type in Model.OrderPaymentTypes)
+                {
+                    <option value="@type.Id" @(type.Id == Model.OrderPaymentTypeId ? " selected" : null)>@type.Type</option>
+                }
+            </select>
+        </div>
+        <div class="form-group col-lg-4 col-md-12">
+            <label for="orderDeliveryTypeId">Delivery:</label>
+            <select class="form-control" id="orderDeliveryTypeId">
+                @foreach (var type in Model.OrderDeliveryTypes)
+                {
+                    <option value="@type.Id" @(type.Id == Model.OrderDeliveryTypeId ? " selected" : null)>@type.Type</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class=" mb-3 text-right">
+        <button type="button" class="btn btn-outline-success" id="save-order-info">Save</button>
+    </div>
+    <!-- Info End -->
+    <!-- Products Start -->
+    <table class="table table-sm table-hover table-responsive table-centered">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col" width="15%"></th>
+                <th scope="col">Name</th>
+                <th scope="col">Price (pcs.)</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Total</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.OrderProducts)
+            {
+                <tr class="product-row" data-item-id="@product.ItemId">
+                    <th scope="row">
+                        <a href="@Url.Action("Product","Shop", new { area = string.Empty, id = product.ProductId })" target="_blank">
+                            @product.ProductId
+                        </a>
+                    </th>
+                    <td>
+                        <a href="@Url.Action("Product","Shop", new { area = string.Empty, id = product.ProductId })" target="_blank">
+                            <img class="img-thumbnail" src="~/@ProductImage(product.Image)" alt="@product.Name" />
+                        </a>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Product","Shop", new { area = string.Empty, id = product.ProductId })" target="_blank">
+                            @product.Name
+                        </a>
+                    </td>
+                    <td>@product.Price</td>
+                    <td><input class="form-control" type="number" name="quantity" value="@product.Quantity" min="0" /></td>
+                    <td class="product-total">@product.Total</td>
+                    <td class="order-product-delete"><i class="pointer fa fa-trash-alt text-danger"></i></td>
+                </tr>
+            }
+            <tr>
+                <th scope="row"></th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="font-weight-bold" style="text-align:right!important;">Total:</td>
+                <td class="font-weight-bold" id="total-sum">@Model.TotalSum</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- Products End -->
+</div>
+<script>
+    $('#save-order-info').click(function () {
+        var data = { orderId: $('input#order-id').val() };
+        $('.form-row input,select').each(function (i, el) {
+            data[$(el).attr('id')] = $(el).val();
+        });
+        $.ajax({
+            method: 'POST',
+            url: '@Url.Action("SaveOrderInfo", "Orders", new { area = "Admin"})',
+            data: data,
+            success: function (data) {
+                if (data.success) {
+                    search();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Updated',
+                        text: 'Order details have been successfully changed!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating the order!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            }
+        });
+    });
+    $('#edit-order-info').change(function () {
+        if ($(this).is(':checked')) {
+            $('#order-info input').attr('readonly', null);
+        } else {
+            $('#order-info input').attr('readonly', 'readonly');
+        }
+    });
+    $('.product-row .order-product-delete').click(function () {
+        var parent = $(this).parents('tr');
+        var orderId = $('input#order-id').val();
+        var itemId = parent.data('item-id');
+        Swal.fire({
+            type: 'warning',
+            title: 'Deleting',
+            text: 'Are you sure you want to remove this item from your order?',
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    method: 'POST',
+                    url: '@Url.Action("DeleteOrderItem", "Orders", new { area = "Admin" })',
+                    data: { orderId: orderId, itemId: itemId },
+                    success: function (data) {
+                        if (data.success) {
+                            search();
+                            Swal.fire({
+                                type: 'success',
+                                title: 'Deleted',
+                                text: 'The item has been successfully deleted!',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                            parent.fadeOut().remove();
+                        } else {
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while deleting!',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    });
+    $('.product-row input[name="quantity"]').bind('keyup mouseup', function () {
+        var _this = $(this);
+        var parent = _this.parents('tr');
+        var value = _this.val();
+        var orderId = $('input#order-id').val();
+        var itemId = parent.data('item-id');
+        if (!isNaN(value)) {
+            if (value > 0) {
+                $.ajax({
+                    method: 'POST',
+                    url: '@Url.Action("ChangeOrderItemQuantity", "Orders", new { area = "Admin" })',
+                    data: { orderId: orderId, itemId: itemId, quantity: value },
+                    success: function (data) {
+                        search();
+                        $('#total-sum').text(data.total);
+                        _this.parent().siblings('.product-total').text(data.itemTotal);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    type: 'warning',
+                    title: 'Deleting',
+                    text: 'Are you sure you want to remove this item from your order?',
+                    showConfirmButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.value) {
+                        $.ajax({
+                            method: 'POST',
+                            url: '@Url.Action("DeleteOrderItem", "Orders", new { area = "Admin" })',
+                            data: { orderId: orderId, itemId: itemId },
+                            success: function (data) {
+                                if (data.success) {
+                                    search();
+                                    Swal.fire({
+                                        type: 'success',
+                                        title: 'Deleted',
+                                        text: 'The item has been successfully deleted!',
+                                        showConfirmButton: false,
+                                        timer: 2000
+                                    });
+                                    parent.fadeOut().remove();
+                                } else {
+                                    Swal.fire({
+                                        type: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred while deleting!',
+                                        showConfirmButton: false,
+                                        timer: 2000
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    _this.val(1);
+                });
+            }
+        }
+    });
+</script>

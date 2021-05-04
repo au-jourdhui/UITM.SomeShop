@@ -1,0 +1,40 @@
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 45px;
+    line-height: 45px; /* Vertically center the text there */
+}
+
+main {
+    margin-top: 56px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.table-centered td, th {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        min-width: 80% !important;
+    }
+}
+
+::-webkit-scrollbar-track {
+    background-color: #999999;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #000000;
+}

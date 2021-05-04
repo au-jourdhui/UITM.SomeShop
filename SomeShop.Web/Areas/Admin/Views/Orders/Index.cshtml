@@ -1,0 +1,98 @@
+﻿<div class="input-group my-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon">Search</span>
+    </div>
+    <input id="order-search" type="text" class="form-control" placeholder="Start typing to search..." aria-describedby="basic-addon">
+</div>
+<div id="order-list" class="table-responsive"></div>
+
+<div id="modal-large" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function search(value) {
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("_OrderList", "Orders", new { area = "Admin" })',
+            data: { search: value },
+            success: function (html) {
+                $('#order-list').html(html);
+            }
+        });
+    }
+    $(document).ready(function () {
+        activeLink('orders-link');
+
+        var searchTimer;
+        search();
+
+        $('.order-row').click(function () {
+            var id = $(this).data('order-id');
+            window.location.replace('@Url.Action("Index", "Orders", new { area = "Admin" })?id=' + id);
+        });
+        $('#order-search').on('keyup', function () {
+            var value = $('#order-search').val();
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function () {
+                search(value);
+            }, 500);
+        });
+        $('#order-list').on('click', '.order-row td:not(.order-delete-restore)', function () {
+            var _this = $(this).parent();
+            var id = _this.data('order-id');
+            $.ajax({
+                method: 'GET',
+                url: '@Url.Action("_Order", "Orders", new { area = "Admin" })',
+                data: { id: id },
+                success: function (html) {
+                    $('#modal-large .modal-header .modal-title').html('Order №' + id);
+                    $('#modal-large .modal-body').html(html);                    
+                    $('#modal-large').modal('show');
+                }
+            });
+        });
+
+        $('#order-list').on('click', '.order-delete-restore', function () {
+            var _this = $(this);
+            var id = _this.parent().data('order-id');
+            $.ajax({
+                url: '@Url.Action("DeleteOrRestoreOrder", "Orders", new { area = "Admin" })',
+                method: 'POST',
+                data: { id: id },
+                success: function (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Success',
+                            text: data.isDeleted ? 'The item has been successfully deleted!' : 'The item has been successfully restored!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        _this.find('i').removeClass('fa-trash-restore-alt text-success fa-trash-alt text-danger').addClass(data.isDeleted ? 'fa-trash-restore-alt text-success' : 'fa-trash-alt text-danger');                    
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while removing / restoring!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            })
+        });
+    });
+</script>
+}

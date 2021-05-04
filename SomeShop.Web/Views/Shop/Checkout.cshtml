@@ -1,0 +1,174 @@
+﻿@model SomeShop.Web.Models.ShopModels.CheckoutVM
+@{
+    var user = ViewBag.SystemUser as SomeShop.DAL.Models.User;
+    var items = Model.CartItems;
+}
+<!-- Page Banner Section Start -->
+<div class="container-fluid bg-success py-5 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="page-banner text-left">
+                    <h2>Checkout</h2>
+                    <ul class="page-breadcrumb">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li>Checkout</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!--Checkout section start-->
+<div class="checkout-section section pt-90 pt-lg-70 pt-md-60 pt-sm-50 pt-xs-40  pb-70 pb-lg-50 pb-md-40 pb-sm-30 pb-xs-20">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                @if (Model.CartItems?.Count() > 0)
+                {
+                    <!-- Checkout Form Start-->
+                    <div class="checkout-form">
+                        <div class="row row-40">
+                            <div class="col-lg-6">
+                                <!-- Billing Address -->
+                                <div id="billing-form" class="mb-10">
+                                    <h4 class="checkout-title">Personal data</h4>
+                                    <div class="row">
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>First Name <span class="text-danger">*</span></label>
+                                            <input name="firstName" type="text" placeholder="First Name" value="@user.FirstName">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>Last Name <span class="text-danger">*</span></label>
+                                            <input name="lastName" type="text" placeholder="Last Name" value="@user.LastName">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>Email <span class="text-danger">*</span></label>
+                                            <input name="email" type="email" placeholder="Email" value="@user.Email">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>Phone <span class="text-danger">*</span></label>
+                                            <input name="phone" type="text" maxlength="13" placeholder="Phone" value="@user.Phone">
+                                        </div>
+                                        <div class="col-12 mb-20">
+                                            <label>Address <span class="text-danger">*</span></label>
+                                            <input name="address" type="text" placeholder="Address">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>City <span class="text-danger">*</span></label>
+                                            <input name="city" type="text" placeholder="City">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>District <span class="text-danger">*</span></label>
+                                            <input name="region" type="text" placeholder="District">
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>Delivery <span class="text-danger">*</span></label>
+                                            <select class="nice-select" id="delivery-type">
+                                                @foreach (var item in Model.OrderDeliveryTypes)
+                                                {
+                                                    <option value="@item.Id">@item.Type</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-20">
+                                            <label>Payment type <span class="text-danger">*</span></label>
+                                            <select class="nice-select" id="payment-type">
+                                                @foreach (var item in Model.OrderPaymentTypes)
+                                                {
+                                                    <option value="@item.Id">@item.Type</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Billing Address -->
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <!-- Cart Total -->
+                                    <div class="col-12">
+                                        <h4 class="checkout-title">Order</h4>
+                                        <div class="checkout-cart-total">
+                                            <h4>Item <span>Price</span></h4>
+                                            <ul class="mb-3">
+                                                @foreach (var item in items)
+                                                {
+                                                    <li class="w-100">@item.Name X @item.Quantity <span class="text-warning">@item.Total$</span></li>
+                                                }
+                                            </ul>
+                                            <h4>Total: <span class="text-warning">@Model.Sum$</span></h4>
+                                            <div class="row p-0 mt-3">
+                                                <div class="col">
+                                                    <button id="checkout-btn" class="btn w-100">Checkout</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Cart Total -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Checkout Form End-->
+                }
+                else
+                {
+                    <p class="lead">There are no items in your cart...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!--Checkout section end-->
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#checkout-btn').click(function () {
+                var firstName = $('input[name="firstName"]').val();
+                var lastName = $('input[name="lastName"]').val();
+                var email = $('input[name="email"]').val();
+                var phone = $('input[name="phone"]').val();
+                var address = $('input[name="address"]').val();
+                var city = $('input[name="city"]').val();
+                var region = $('input[name="region"]').val();
+                var deliveryTypeId = $('#delivery-type option:selected').val();
+                var paymentTypeId = $('#payment-type option:selected').val();
+                $.ajax({
+                    url: '@Url.Action("Order", "Shop")',
+                    method: 'POST',
+                    data: {
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: phone,
+                        address: address,
+                        city: city,
+                        region: region,
+                        deliveryTypeId: deliveryTypeId,
+                        paymentTypeId: paymentTypeId
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success',
+                                type: 'success',
+                                html: data.message
+                            }).then(function () {
+                                window.location.replace('@Url.Action("Index", "Account", new { tab = AccountTab.Orders })');
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                type: 'error',
+                                html: data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

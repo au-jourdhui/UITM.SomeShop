@@ -1,0 +1,147 @@
+﻿@model SomeShop.Web.Models.ShopModels.CartVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+
+<!-- Page Banner Section Start -->
+<div class="container-fluid bg-secondary py-5 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="page-banner text-left">
+                    <h2>Shopping cart</h2>
+                    <ul class="page-breadcrumb">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li>Shopping cart</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!--Cart section start-->
+<div class="cart-section section pt-90 pt-lg-70 pt-md-60 pt-sm-50 pt-xs-45  pb-70 pb-lg-50 pb-md-40 pb-sm-30 pb-xs-20">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-12">
+                <!-- Cart Table -->
+                <div class="cart-table table-responsive mb-30">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="pro-thumbnail"></th>
+                                <th class="pro-title">Item</th>
+                                <th class="pro-price">Price (pcs.)</th>
+                                <th class="pro-quantity">Quantity</th>
+                                <th class="pro-subtotal">Total</th>
+                                <th class="pro-remove"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <tr data-item-id="@item.ItemId">
+                                    <td class="pro-thumbnail">
+                                        <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })">
+                                            <img src="~/@ProductImage(item.Image)" alt="@item.Name">
+                                        </a>
+                                    </td>
+                                    <td class="pro-title">
+                                        <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })">@item.Name</a>
+                                    </td>
+                                    <td class="pro-price">
+                                        <span>@item.Price$</span>
+                                    </td>
+                                    <td class="pro-quantity">
+                                        <div class="pro-qty">
+                                            <input class="item-quantity" type="number" value="@item.Quantity" min="1" />
+                                        </div>
+                                    </td>
+                                    <td class="pro-subtotal">
+                                        <span class="item-total">@item.Total$</span>
+                                    </td>
+                                    <td class="pro-remove">
+                                        <a class="remove-from-cart" data-item-id="@item.ItemId">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-center justify-content-lg-end">
+                    <!-- Cart Summary -->
+                    <div class="col-lg-6 col-12 mb-30 d-flex">
+                        <div class="cart-summary">
+                            <div class="cart-summary-wrap">
+                                <h4>Shopping cart</h4>
+                                <p>Cost of goods: <span class="cart-items-sum">@Model.Sum$</span></p>
+                                <h2>Total: <span class="cart-sum">@Model.Sum$</span></h2>
+                            </div>
+                            <div class="cart-summary-button">
+                                <button id="checkout-cart" class="btn">Checkout</button>
+                                <button id="reload-cart" class="btn">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cart Summary -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Cart section end-->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#reload-cart').click(function () {
+                window.location.reload(true);
+            });
+            $('#checkout-cart').click(function () {
+                window.location.replace('@Url.Action("Checkout", "Shop")');
+            });
+
+            $('.remove-from-cart').click(function () { setTimeout(function () { window.location.reload(true); }, 2000) });
+            $('.item-quantity').bind('change', function () {
+                var _this = $(this);
+                changePrice(_this);
+            });
+            $('.dec.qtybtn, .inc.qtybtn').on('click', function () {
+                var _this = $(this);
+                changePrice(_this);
+            });
+
+            function changePrice(_this) {
+                setTimeout(function () {
+                    var parent = _this.parents('tr');
+                    var itemId = parent.data('item-id');
+                    var quantity = parent.find('.item-quantity').val();
+                    $.ajax({
+                        url: '@Url.Action("AddToCart", "Shop")',
+                        method: 'POST',
+                        data: { itemId: itemId, quantity: quantity },
+                        success: function (data) {
+                            if (!data.success) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    type: 'error',
+                                    html: data.message
+                                }).then(function () {
+                                    window.location.reload(true);
+                                });
+                                return;
+                            }
+                            if (data.item) {
+                                parent.find('.item-total').text(data.item.total + '$');
+                            } else {
+                                parent.remove();
+                            }
+                            $('.cart-items-sum, .cart-sum').text(data.cartTotal + '$');
+                        }
+                    });
+                }, 200);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,267 @@
+﻿@model SomeShop.Web.Models.AccountModels.IndexVM
+@using static SomeShop.Web.Extensions.ImagePathExtension
+<!-- Page Banner Section Start -->
+<div class="container">
+    <div class="row">
+        <div class="col">
+
+            <div class="page-banner text-left">
+                <h2>My profile</h2>
+                <ul class="page-breadcrumb">
+                    <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li>My profile</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!--My Account section start-->
+<div class="my-account-section section pt-90 pt-lg-70 pt-md-60 pt-sm-50 pt-xs-45  pb-100 pb-lg-80 pb-md-70 pb-sm-60 pb-xs-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <!-- My Account Tab Menu Start -->
+                    <div class="col-lg-2 col-12">
+                        <div class="myaccount-tab-menu nav" role="tablist">
+                            <a href="#dashboad" class="@(Model.Tab == AccountTab.Dashboard ? "active" : null)" data-toggle="tab"><i class="fa fa-dashboard"></i>Home</a>
+                            <a href="#favourite" class="@(Model.Tab == AccountTab.Favourite ? "active" : null)" data-toggle="tab"><i class="fa fa-star"></i>Favourites</a>
+                            <a href="#orders" class="@(Model.Tab == AccountTab.Orders ? "active" : null)" data-toggle="tab"><i class="fa fa-cart-arrow-down"></i>Orders</a>
+                            <a href="#account-info" class="@(Model.Tab == AccountTab.Info ? "active" : null)" data-toggle="tab"><i class="fa fa-user"></i>Personal Area</a>
+                            <a href="@Url.Action("Cart", "Shop")"><i class="fa fa-shopping-cart"></i>Shopping Cart</a>
+                            <a href="@Url.Action("Logout", "Account")"><i class="fa fa-sign-out"></i>Log out</a>
+                        </div>
+                    </div>
+                    <!-- My Account Tab Menu End -->
+                    <!-- My Account Tab Content Start -->
+                    <div class="col-lg-10 col-12">
+                        <div class="tab-content" id="myaccountContent">
+                            <!-- Single Tab Content Start -->
+                            <div class="tab-pane fade@(Model.Tab == AccountTab.Dashboard ? " show active" : null)" id="dashboad" role="tabpanel">
+                                <div class="myaccount-content">
+                                    <h3>Control Panel</h3>
+
+                                    <div class="welcome mb-20">
+                                        <p>Good day, <strong>@($"{Model.User.FirstName} {Model.User.LastName}")</strong> (<a href="@Url.Action("Logout", "Account")" class="logout text-danger">click here if it's not you</a>)</p>
+                                    </div>
+
+                                    <p class="mb-0">
+                                        From your account dashboard, you can easily view your recent orders, manage shipping and billing addresses, and edit your password and account information.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Single Tab Content End -->
+                            <!-- Single Tab Content Start -->
+                            <div class="tab-pane fade@(Model.Tab == AccountTab.Favourite ? " show active" : null)" id="favourite" role="tabpanel">
+                                <div class="myaccount-content">
+                                    <h3>Favourites</h3>
+                                    <div class="row justify-content-center">
+                                        @if (Model.Products?.Count() > 0)
+                                        {
+                                            foreach (var product in Model.Products)
+                                            {
+                                                <!--  Single Grid Product Start -->
+                                                <div class="col-lg-4 col-md-6 col-sm-10 favourite-product">
+                                                    <div class="single-grid-product mb-40">
+                                                        <div class="product-image text-center">
+                                                            @if (product.Discount.HasValue)
+                                                            {
+                                                                <div class="product-label">
+                                                                    <span>@product.Discount.Value%</span>
+                                                                </div>
+                                                            }
+                                                            <a href="@Url.Action("Product", "Shop", new { id = product.ProductId })">
+                                                                <img src="~/@ProductImage(product.Image)" class="img-fluid" alt="">
+                                                            </a>
+                                                        </div>
+                                                        <div class="product-content">
+                                                            <h3 class="title"> <a href="@Url.Action("Product", "Shop", new { id = product.ProductId })">@product.Name</a></h3>
+                                                            @if (product.OldPrice.HasValue)
+                                                            {
+                                                                <p class="product-price"><span class="discounted-price">@product.Price$</span> <span class="main-price discounted">@product.OldPrice$</span></p>
+                                                            }
+                                                            else
+                                                            {
+                                                                <p class="product-price"><span class="regular-price">@product.Price$</span></p>
+                                                            }
+                                                            <button class="btn text-center delete-favourite" data-product-id="@product.ProductId">Delete</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--  Single Grid Product End -->
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p class="lead">The list is still empty...</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Single Tab Content End -->
+                            <!-- Single Tab Content Start -->
+                            <div class="tab-pane fade@(Model.Tab == AccountTab.Orders ? " show active" : null)" id="orders" role="tabpanel">
+                                <div class="myaccount-content">
+                                    <h3>Orders</h3>
+                                    <div class="myaccount-table table-responsive text-center">
+                                        <table class="table table-bordered">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Full name</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Price</th>
+                                                    <th>Delivery</th>
+                                                    <th>Payment</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @foreach (var item in Model.OrderDetails)
+                                                {
+                                                    <tr data-order-id="@item.OrderId">
+                                                        <td>@item.OrderId</td>
+                                                        <td>@item.Name</td>
+                                                        <td>@item.Date.ToShortDateString()</td>
+                                                        <td>@item.Status</td>
+                                                        <td>@item.Total</td>
+                                                        <td>@item.DeliveryType</td>
+                                                        <td>@item.PaymentType</td>
+                                                        <td><button class="btn order-details"><i class="fa fa-search"></i></button></td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Single Tab Content End -->
+                            <!-- Single Tab Content Start -->
+                            <div class="tab-pane fade@(Model.Tab == AccountTab.Info ? " show active" : null)" id="account-info" role="tabpanel">
+                                <div class="myaccount-content">
+                                    <h3>Personal data</h3>
+
+                                    <div class="account-details-form">
+                                        <form action="@Url.Action("UpdateUserInfo", "Account")" method="post">
+                                            <div class="row">
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="FirstName" id="first-name" placeholder="First Name*" type="text" value="@Model.User.FirstName">
+                                                </div>
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="LastName" id="last-name" placeholder="Last Name" type="text" value="@Model.User.LastName">
+                                                </div>
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="Birthdate" id="display-name" placeholder="Birthdate" type="date" value="@(Model.User.Birthdate.HasValue ? Model.User.Birthdate.Value.ToString("yyyy-MM-dd") : null)">
+                                                </div>
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="Phone" id="last-name" placeholder="Phone" type="tel" value="@Model.User.Phone">
+                                                </div>
+                                                <div class="col-12 mb-30">
+                                                    <input name="Email" id="email" placeholder="Email*" type="email" value="@Model.User.Email">
+                                                </div>
+                                                <div class="col-12 mb-30">
+                                                    <h4>Changing the current password:</h4>
+                                                </div>
+                                                <div class="col-12 mb-30">
+                                                    <input name="CurrentPassword" id="current-pwd" placeholder="Current password" type="password">
+                                                </div>
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="NewPassword" id="new-pwd" placeholder="New password" type="password">
+                                                </div>
+                                                <div class="col-lg-6 col-12 mb-30">
+                                                    <input name="ConfirmPassword" id="confirm-pwd" placeholder="Confirm password" type="password">
+                                                </div>
+                                                <div class="col-12">
+                                                    <button type="submit" class="save-change-btn">Save</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Single Tab Content End -->
+                        </div>
+                    </div>
+                    <!-- My Account Tab Content End -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">Large modal</button>*@
+
+<div class="modal fade" tabindex="-1" role="dialog" id="order-info-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title font-weight-bold h4">Information about order<span id="order-info-modal-header"></span></p>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-12" id="order-info-modal-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--My Account section end-->
+
+@section Scripts{
+    @if (Model.HasError)
+    {
+        <script>
+            Swal.fire({
+                title: 'Error',
+                type: 'error',
+                html: '@Html.Raw(Model.Error)'
+            });
+        </script>
+    }
+    else if (Model.UpdatedUserInfo)
+    {
+        <script>
+            Swal.fire({
+                title: 'Updated',
+                type: 'success',
+                html: 'Personal data has been successfully updated!'
+            });
+        </script>
+    }
+    <script>
+        $(document).ready(function () {
+            $('.delete-favourite').click(function () {
+                var _this = $(this);
+                var productId = _this.data('product-id');
+                $.ajax({
+                    url: '@Url.Action("RemoveFromWishlist", "Account")',
+                    method: 'POST',
+                    data: { productId: productId },
+                    success: function (data) {
+                        if (data.success) {
+                            _this.parents('.favourite-product').remove();
+                        }
+                    }
+                });
+            });
+
+            $('.order-details').click(function () {
+                var _this = $(this);
+                var orderId = _this.parents('tr').data('order-id');
+                $.ajax({
+                    url: '@Url.Action("_OrderProductInfo", "Shop")',
+                    data: { orderId: orderId },
+                    success: function (html) {
+                        $('#order-info-modal-content').html(html);
+                        $('#order-info-modal').modal('show');
+                    }
+                });
+            });
+        });
+    </script>
+}

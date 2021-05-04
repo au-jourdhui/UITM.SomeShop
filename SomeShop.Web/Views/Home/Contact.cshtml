@@ -1,0 +1,150 @@
+﻿@model IEnumerable<SomeShop.DAL.Models.ContactInfo>
+
+@{
+    var user = ViewBag.SystemUser;
+    bool flag = false;
+}
+<!-- Page Banner Section Start -->
+<div class="container-fluid bg-warning py-5 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="page-banner text-left">
+                    <h2>Contacts</h2>
+                    <ul class="page-breadcrumb">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li>Contacts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Banner Section End -->
+<!--Contact section start-->
+<div class="conact-section section pt-85 pt-lg-65 pt-md-55 pt-sm-45 pt-xs-35 pb-100 pb-lg-80 pb-md-70 pb-sm-60 pb-xs-50">
+    <div class="container mb-50">
+        <div class="row">
+            <div class="row">
+                <div class="col-12">
+                    <div class="contact-form-wrap">
+                        <h3 class="contact-title">Write to us</h3>
+                        <div id="contact-form">
+                            <div class="row">
+                                <div class="col-lg-5">
+                                    <div class="name-fild-padding mb-sm-30 mb-xs-30">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="contact-form-style mb-20">
+                                                    <label class="fild-name">Name <span class="text-danger">*</span>:</label>
+                                                    <input name="name" placeholder="Name..." type="text" value="@user?.FirstName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="contact-form-style mb-20">
+                                                    <label class="fild-name">Email <span class="text-danger">*</span>:</label>
+                                                    <input name="email" placeholder="Email..." type="email" value="@user?.Email" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="check-box">
+                                                    <input type="checkbox" id="create_account" name="create_account">
+                                                    <label for="create_account">Not a robot <span class="text-danger">*</span></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-7">
+                                    <div class="contact-form-style bl">
+                                        <label class="fild-name pl-15">Message <span class="text-danger">*</span>:</label>
+                                        <textarea class="pl-15" name="message" placeholder="Your message text..."></textarea>
+                                        <button class="btn" id="send-msg-btn"><span>Submit</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="form-messege"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--Contact section end-->
+    <!--Contact Map section start-->
+    @foreach (var contactInfo in Model)
+    {
+        <div class="contact-map-section section">
+            <p class="display-4 mb-0 map-title">@contactInfo.Address</p>
+            <div>
+                @if (!string.IsNullOrWhiteSpace(contactInfo.TimeTable))
+                {
+                    <hr />
+                    @foreach (var time in contactInfo.TimeTable.Split(';'))
+                    {
+                        <p @(flag ? "class=\"mb-15\"" : "")>@Html.Raw(time)</p>
+                        flag = true;
+                    }
+                }
+                @if (!string.IsNullOrWhiteSpace(contactInfo.Phones))
+                {
+                    flag = false;
+                    @foreach (var phone in contactInfo.Phones.Split(';'))
+                    {
+                        @(flag ? @Html.Raw("<br/>") : null)
+                        <a href="tel://@phone.Replace("(", "").Replace(")", "")">@phone</a>
+                        flag = true;
+                    }
+                    <hr />
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(contactInfo.GoogleUrl))
+            {
+                <div id="contact-map" class="contact-map mt-0">
+                    <iframe src="@Html.Raw(contactInfo.GoogleUrl)" frameborder="0" style="border:0; width: 100%; height: 100%;" allowfullscreen="true"></iframe>
+                </div>
+            }
+        </div>
+    }
+    <!--Contact Map section End-->
+</div>
+
+@section Scripts{
+    <script>
+        $('#send-msg-btn').click(function () {
+            debugger;
+            var data = {
+                name: $('input[name="name"]').val(),
+                email: $('input[name="email"]').val(),
+                isNotRobot: $('input[name="create_account"]').is(':checked'),
+                message: $('textarea[name="message"]').val()
+            };
+            $.ajax({
+                method: 'POST',
+                url: '@Url.Action("SendMessage", "Home")',
+                data: data,
+                success: function (data) {
+                    if (!data) {
+                        Swal.fire({
+                            title: 'Error',
+                            type: 'error',
+                            html: 'An error occurred when requesting! Contact Support.'
+                        });
+                    } else if (!data.success) {
+                        Swal.fire({
+                            title: 'Error',
+                            type: 'error',
+                            html: data.message
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Sent',
+                            type: 'success'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+}

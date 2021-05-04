@@ -1,0 +1,39 @@
+﻿@model IEnumerable<SomeShop.DAL.Models.StoredProcedureModels.OrderProductsInfo_Result>
+@using static SomeShop.Web.Extensions.ImagePathExtension
+<table class="table">
+    <thead>
+        <tr class="text-center">
+            <th class="pro-thumbnail"></th>
+            <th class="pro-title">Item</th>
+            <th class="pro-price">Price (pcs.)</th>
+            <th class="pro-quantity">Quantity</th>
+            <th class="pro-subtotal">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-item-id="@item.ItemId">
+                <td class="pro-thumbnail">
+                    <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })">
+                        <img src="~/@ProductImage(item.Image)" alt="@item.Name">
+                    </a>
+                </td>
+                <td class="pro-title">
+                    <a href="@Url.Action("Product", "Shop", new { id = item.ProductId })">@item.Name</a>
+                </td>
+                <td class="pro-price">
+                    <span>@item.Price$</span>
+                </td>
+                <td class="pro-quantity">
+                    <div class="pro-qty">
+                        <p class="font-weight-bold">@item.Quantity</p>
+                    </div>
+                </td>
+                <td class="pro-subtotal">
+                    <span class="item-total">@item.Total$</span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

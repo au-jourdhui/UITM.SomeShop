@@ -1,0 +1,40 @@
+﻿@model SomeShop.DAL.Models.StoredProcedureModels.ProductItemInfo_Result
+@using static SomeShop.Web.Extensions.ImagePathExtension
+@{
+    bool isAuthorized = !(ViewBag.Anonymous ?? true);
+}
+<!--  Single Grid product Start -->
+<div class="single-grid-product mb-40" data-name="@Model.Name" data-price="@Model.Price">
+    <div class="product-image text-center">
+        @if (Model.Discount.HasValue)
+        {
+            <div class="product-label">
+                <span>@Model.Discount.Value%</span>
+            </div>
+        }
+        <a href="@Url.Action("Product", "Shop", new { id = Model.ProductId })">
+            <img src="~/@ProductImage(Model.Image)" class="img-fluid" alt="">
+        </a>
+        @if (isAuthorized)
+        {
+            <div class="product-action">
+                <ul>
+                    <li><a class="add-to-cart-btn" data-item-id="@Model.ItemId"><i class="fa fa-cart-plus"></i></a></li>
+                    <li><a class="wishlist-btn@(Model.Favourite ? " active" : null)" data-product-id="@Model.ProductId"><i class="fa fa-heart-o"></i></a></li>
+                </ul>
+            </div>
+        }
+    </div>
+    <div class="product-content">
+        <h3 class="title"> <a href="@Url.Action("Product", "Shop", new { id = Model.ProductId })">@Model.Name</a></h3>
+        @if (Model.OldPrice.HasValue)
+        {
+            <p class="product-price"><span class="discounted-price">@Model.Price$</span> <span class="main-price discounted">@Model.OldPrice$</span></p>
+        }
+        else
+        {
+            <p class="product-price"><span class="regular-price">@Model.Price$</span></p>
+        }
+    </div>
+</div>
+<!--  Single Grid product End -->
