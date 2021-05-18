@@ -7801,3 +7801,7 @@ button.swal2-confirm {
 ::-webkit-scrollbar-thumb {
     background-color: green;
 }
+
+a[href="http://somee.com"] {
+    display: none;
+}
