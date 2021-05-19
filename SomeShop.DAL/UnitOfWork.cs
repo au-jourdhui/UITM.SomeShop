@@ -30,6 +30,7 @@ namespace SomeShop.DAL
         public RoleDao Roles { get; set; }
         public SupportMessageDao SupportMessages { get; set; }
         public UserDao Users { get; set; }
+        public ChatAdministratorsDao ChatAdministrators { get; set; }
 
         public UnitOfWork(IDbConnection connection)
         {
@@ -57,6 +58,7 @@ namespace SomeShop.DAL
             Roles = new RoleDao(connection);
             SupportMessages = new SupportMessageDao(connection);
             Users = new UserDao(connection);
+            ChatAdministrators = new ChatAdministratorsDao(connection);
         }
 
         public void Dispose() => _connection.Dispose();

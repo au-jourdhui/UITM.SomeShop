@@ -202,6 +202,22 @@ go
 
 if not exists (select 1 
                from sys.tables t 
+               where t.name='ChatAdministrators' 
+               and t.schema_id = schema_id('dbo'))
+create table ChatAdministrators
+(
+    Id int not null primary key identity,
+    UserId int not null foreign key references Users(Id),
+    UserName nvarchar(100) not null,
+    ChatId bigint not null,
+    DateCreated datetime not null default(getdate()),
+    DateModified datetime not null default(getdate()),
+    IsDeleted bit not null default(0)
+);
+go
+
+if not exists (select 1 
+               from sys.tables t 
                where t.name='Cart' 
                and t.schema_id = schema_id('dbo'))
   create table Cart

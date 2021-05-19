@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using SomeShop.Web.Chat;
 
 namespace SomeShop.Web
 {
@@ -12,6 +14,10 @@ namespace SomeShop.Web
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .ConfigureServices(services =>
+                {
+                    services.AddHostedService<LongPollingChat>();
+                });
     }
 }
