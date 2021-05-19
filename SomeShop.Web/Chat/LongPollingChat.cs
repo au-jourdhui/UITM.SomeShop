@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,8 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SomeShop.DAL;
-using SomeShop.DAL.Models;
 using SomeShop.Web.Chat.MessageHandlers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -20,31 +17,23 @@ namespace SomeShop.Web.Chat
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITelegramBotClient _client;
         private readonly IChatSession _chatSession;
-        private readonly Func<UnitOfWork> _unitOfWorkFactory;
-        private ICollection<ChatAdministrator> _administrators;
 
         public LongPollingChat(
             IServiceScopeFactory serviceScopeFactory,
             ITelegramBotClient client,
-            IChatSession chatSession,
-            Func<UnitOfWork> unitOfWorkFactory)
+            IChatSession chatSession)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _client = client;
             _chatSession = chatSession;
-            _unitOfWorkFactory = unitOfWorkFactory;
 
             _client.OnUpdate += ClientOnOnUpdate;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            using (var unitOfWork = _unitOfWorkFactory())
-            {
-                _administrators = unitOfWork.ChatAdministrators.FindAll().ToList();
                 await SendMessageToAllAdministrators("System is up! Please log in to the system...");
                 _client.StartReceiving(cancellationToken: cancellationToken);
-            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -93,7 +82,7 @@ namespace SomeShop.Web.Chat
 
         private Task SendMessageToAllAdministrators(string message)
         {
-            var chats = _administrators.Select(x => x.ChatId).Distinct().ToList();
+            var chats =  _chatSession.ChatAdministrators.Select(x => x.ChatId).ToList();
             if (!chats.Any())
             {
                 return Task.CompletedTask;
