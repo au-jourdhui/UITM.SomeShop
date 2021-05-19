@@ -27,7 +27,7 @@ namespace SomeShop.Web.Chat
             _client = client;
             _chatSession = chatSession;
 
-            _client.OnUpdate += ClientOnOnUpdate;
+            _client.OnUpdate += async (s, e) => await ClientOnOnUpdate(s, e);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -42,7 +42,7 @@ namespace SomeShop.Web.Chat
             _client.StopReceiving();
         }
 
-        private async void ClientOnOnUpdate(object sender, UpdateEventArgs e)
+        private async Task ClientOnOnUpdate(object sender, UpdateEventArgs e)
         {
             var update = e.Update;
             var handlers = GetMessageHandlers().ToList();
