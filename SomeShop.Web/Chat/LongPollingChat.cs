@@ -32,8 +32,8 @@ namespace SomeShop.Web.Chat
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-                await SendMessageToAllAdministrators("System is up! Please log in to the system...");
-                _client.StartReceiving(cancellationToken: cancellationToken);
+            await SendMessageToAllAdministrators("System is up! Please log in to the system...");
+            _client.StartReceiving(cancellationToken: cancellationToken);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -50,7 +50,7 @@ namespace SomeShop.Web.Chat
             var canHandleTasks = handlers.Select(x => CanHandlingTask(x, e.Update)).ToList();
 
             var results = (await Task.WhenAll(canHandleTasks)).Where(x => x.IsSuccess).ToList();
-            
+
             if (results.Count == 0)
             {
                 await _client.SendTextMessageAsync(update.Message.Chat.Id, "Unknown command!");
@@ -68,7 +68,8 @@ namespace SomeShop.Web.Chat
             }
         }
 
-        private async Task<(bool IsSuccess, IMessageHandler Handler)> CanHandlingTask(IMessageHandler handler, Update update)
+        private async Task<(bool IsSuccess, IMessageHandler Handler)> CanHandlingTask(IMessageHandler handler,
+            Update update)
         {
             var isAnonymous = handler is IAllowAnonymous;
             if (!isAnonymous && _chatSession.ChatAdministrators.All(c => c.ChatId != update.Message.Chat.Id))
@@ -82,7 +83,7 @@ namespace SomeShop.Web.Chat
 
         private Task SendMessageToAllAdministrators(string message)
         {
-            var chats =  _chatSession.ChatAdministrators.Select(x => x.ChatId).ToList();
+            var chats = _chatSession.ChatAdministrators.Select(x => x.ChatId).ToList();
             if (!chats.Any())
             {
                 return Task.CompletedTask;
