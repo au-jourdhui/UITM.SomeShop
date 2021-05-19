@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -7,7 +8,7 @@ using User = SomeShop.DAL.Models.User;
 
 namespace SomeShop.Web.Chat.MessageHandlers
 {
-    public class LoginMessageHandler : IMessageHandler
+    public class LoginMessageHandler : IMessageHandler, IAllowAnonymous
     {
         private const char DataSeparator = ':';
 

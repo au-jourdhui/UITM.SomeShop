@@ -6,7 +6,7 @@ namespace SomeShop.Web.Chat
     {
         public static IServiceCollection AddChatSession(this IServiceCollection services)
         {
-            return services.AddScoped<IChatSession, ChatSession>();
+            return services.AddSingleton<IChatSession, ChatSession>();
         }
     }
 }

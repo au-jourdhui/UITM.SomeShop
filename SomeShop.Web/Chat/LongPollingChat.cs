@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SomeShop.DAL;
@@ -10,20 +11,27 @@ using SomeShop.DAL.Models;
 using SomeShop.Web.Chat.MessageHandlers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
+using Telegram.Bot.Types;
 
 namespace SomeShop.Web.Chat
 {
-    public class LongPollingChat : IHostedService, IDisposable
+    public class LongPollingChat : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITelegramBotClient _client;
+        private readonly IChatSession _chatSession;
         private readonly Func<UnitOfWork> _unitOfWorkFactory;
         private ICollection<ChatAdministrator> _administrators;
 
-        public LongPollingChat(IServiceScopeFactory serviceScopeFactory, ITelegramBotClient client, Func<UnitOfWork> unitOfWorkFactory)
+        public LongPollingChat(
+            IServiceScopeFactory serviceScopeFactory,
+            ITelegramBotClient client,
+            IChatSession chatSession,
+            Func<UnitOfWork> unitOfWorkFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _client = client;
+            _chatSession = chatSession;
             _unitOfWorkFactory = unitOfWorkFactory;
 
             _client.OnUpdate += ClientOnOnUpdate;
@@ -45,24 +53,15 @@ namespace SomeShop.Web.Chat
             _client.StopReceiving();
         }
 
-
-        public async void Dispose()
-        {
-            await SendMessageToAllAdministrators("System is temporarily down...");
-        }
-        
         private async void ClientOnOnUpdate(object sender, UpdateEventArgs e)
         {
             var update = e.Update;
             var handlers = GetMessageHandlers().ToList();
 
-            var canHandleTasks = handlers.Select(async x =>
-            {
-                var result = await x.CanHandle(update);
-                return (IsSuccess: result, Handler: x);
-            }).ToList();
+            var canHandleTasks = handlers.Select(x => CanHandlingTask(x, e.Update)).ToList();
 
             var results = (await Task.WhenAll(canHandleTasks)).Where(x => x.IsSuccess).ToList();
+            
             if (results.Count == 0)
             {
                 await _client.SendTextMessageAsync(update.Message.Chat.Id, "Unknown command!");
@@ -78,6 +77,18 @@ namespace SomeShop.Web.Chat
                 var message = $"Ambiguous command: {string.Join(", ", names)}";
                 await _client.SendTextMessageAsync(update.Message.Chat.Id, message);
             }
+        }
+
+        private async Task<(bool IsSuccess, IMessageHandler Handler)> CanHandlingTask(IMessageHandler handler, Update update)
+        {
+            var isAnonymous = handler is IAllowAnonymous;
+            if (!isAnonymous && _chatSession.ChatAdministrators.All(c => c.ChatId != update.Message.Chat.Id))
+            {
+                return (false, null);
+            }
+
+            var result = await handler.CanHandle(update);
+            return (result, handler);
         }
 
         private Task SendMessageToAllAdministrators(string message)
