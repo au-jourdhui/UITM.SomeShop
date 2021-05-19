@@ -1,9 +1,5 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using SomeShop.DAL;
-using SomeShop.DAL.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -16,37 +12,40 @@ namespace SomeShop.Web.Chat.MessageHandlers
         private const char DataSeparator = ':';
 
         private readonly ITelegramBotClient _telegramBotClient;
-        private readonly UnitOfWork _unitOfWork;
-        private readonly string _password;
+        private readonly IChatSession _chatSession;
 
         private User _user;
 
         public LoginMessageHandler(
             ITelegramBotClient telegramBotClient,
-            Func<UnitOfWork> unitOfWork,
-            IOptions<BotSettings> botSettings)
+            IChatSession chatSession)
         {
-            _password = botSettings.Value?.Password ??
-                        throw new ArgumentNullException(nameof(botSettings.Value.Password));
-
             _telegramBotClient = telegramBotClient;
-            _unitOfWork = unitOfWork();
+            _chatSession = chatSession;
         }
 
         public Task<bool> CanHandle(Update update)
         {
+            if (_chatSession.ChatAdministrators.Any(x => x.ChatId == update.Message.Chat.Id))
+            {
+                return SendAlreadySinged(update.Message);
+            }
+            
             var message = update.Message.Text;
-            if (update.Type != UpdateType.Message || string.IsNullOrWhiteSpace(message) ||
-                !message.StartsWith(_password, StringComparison.Ordinal))
+            if (string.IsNullOrWhiteSpace(message))
             {
                 return Task.FromResult(false);
             }
 
             var parts = message.Split(DataSeparator);
-            if (parts.Length != 2 ||
-                !(_unitOfWork.Users.FirstOrDefault(
-                        x => parts.Last().Equals(x.Email, StringComparison.OrdinalIgnoreCase))
-                    is User user))
+            if (parts.Length != 2)
+            {
+                return Task.FromResult(false);
+            }
+
+            var login = parts.Last();
+            var password = parts.First();
+            if (!(_chatSession.Login(update.Message.Chat, login, password) is User user))
             {
                 return Task.FromResult(false);
             }
@@ -58,29 +57,29 @@ namespace SomeShop.Web.Chat.MessageHandlers
         public Task<bool> HandleAsync(Update update)
         {
             var chat = update.Message.Chat;
-            var administrator = _unitOfWork.ChatAdministrators.FirstOrDefault(x => x.ChatId == chat.Id)
-                                ?? new ChatAdministrator
-                                {
-                                    ChatId = chat.Id,
-                                    UserId = _user.Id,
-                                    UserName = chat.Username
-                                };
-            administrator.DateModified = DateTime.Now;
-
-            if (!_unitOfWork.ChatAdministrators.Merge(administrator))
-            {
-                return Task.FromResult(false);
-            }
-
-            return SendSuccess(chat, _user);
+            var message = update.Message;
+            _chatSession.Register(chat, _user);
+            return SendSuccess(message, _user);
         }
 
-        private async Task<bool> SendSuccess(Telegram.Bot.Types.Chat chat, User user)
+        private async Task<bool> SendSuccess(Message message, User user)
         {
-            await _telegramBotClient.SendTextMessageAsync(chat.Id,
+            var deleteTask = _telegramBotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            var sendTask = _telegramBotClient.SendTextMessageAsync(message.Chat.Id,
                 $"Successfully logged in using: ```{user.Email}```",
                 ParseMode.MarkdownV2);
+
+            await Task.WhenAll(deleteTask, sendTask);
             return true;
+        }
+        
+        private async Task<bool> SendAlreadySinged(Message message)
+        {
+            var deleteTask = _telegramBotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            var sendTask = _telegramBotClient.SendTextMessageAsync(message.Chat.Id, "You are already signed in!");
+
+            await Task.WhenAll(deleteTask, sendTask);
+            return false;
         }
     }
 }

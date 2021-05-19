@@ -22,6 +22,7 @@ namespace SomeShop.Web
                 .AddApplicationConfiguration(Configuration)
                 .AddUnitOfWork()
                 .AddMessageHandlers()
+                .AddChatSession()
                 .AddTelegramBotClient(Configuration);
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
