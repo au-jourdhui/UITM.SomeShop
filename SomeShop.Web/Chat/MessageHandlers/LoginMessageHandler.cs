@@ -29,7 +29,7 @@ namespace SomeShop.Web.Chat.MessageHandlers
         {
             if (_chatSession.ChatAdministrators.Any(x => x.ChatId == update.Message.Chat.Id))
             {
-                return SendAlreadySinged(update.Message);
+                return Task.FromResult(false);
             }
             
             var message = update.Message.Text;
@@ -72,15 +72,6 @@ namespace SomeShop.Web.Chat.MessageHandlers
 
             await Task.WhenAll(deleteTask, sendTask);
             return true;
-        }
-        
-        private async Task<bool> SendAlreadySinged(Message message)
-        {
-            var deleteTask = _telegramBotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            var sendTask = _telegramBotClient.SendTextMessageAsync(message.Chat.Id, "You are already signed in!");
-
-            await Task.WhenAll(deleteTask, sendTask);
-            return false;
         }
     }
 }
