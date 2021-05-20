@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -5,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SomeShop.DAL;
 using SomeShop.Web.Chat.MessageHandlers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -16,15 +18,18 @@ namespace SomeShop.Web.Chat
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITelegramBotClient _client;
+        private readonly Func<UnitOfWork> _uowFactory;
         private readonly IChatSession _chatSession;
 
         public LongPollingChat(
             IServiceScopeFactory serviceScopeFactory,
             ITelegramBotClient client,
+            Func<UnitOfWork> uowFactory,
             IChatSession chatSession)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _client = client;
+            _uowFactory = uowFactory;
             _chatSession = chatSession;
 
             _client.OnUpdate += async (s, e) => await ClientOnOnUpdate(s, e);
@@ -83,7 +88,7 @@ namespace SomeShop.Web.Chat
 
         private Task SendMessageToAllAdministrators(string message)
         {
-            var chats = _chatSession.ChatAdministrators.Select(x => x.ChatId).ToList();
+            var chats = _uowFactory().ChatAdministrators.Select(x => x.ChatId).ToList();
             if (!chats.Any())
             {
                 return Task.CompletedTask;
