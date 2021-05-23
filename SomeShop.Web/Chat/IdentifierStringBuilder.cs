@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using SomeShop.Web.Chat.SignalR;
@@ -11,33 +10,43 @@ namespace SomeShop.Web.Chat
         public const string LeftPart = "Identifier: \\[";
         public const string RightPart = "]";
         public const string Separator = ", ";
-        public static readonly Regex IdentifierRegex = new Regex($"(?<={LeftPart}).*?(?={RightPart})");
-        
-        public static string Construct(string identifier, IdentifierType type)
+        public static readonly Regex IdentifierRegex = new($"(?<={LeftPart}).*?(?={RightPart})");
+
+        public static string Construct(ChatHubUser user)
         {
-            var builder = new StringBuilder(LeftPart).Append(type).Append(Separator).Append(identifier).Append(RightPart);
+            var builder = new StringBuilder(LeftPart)
+                .Append(user.IdentifierType)
+                .Append(Separator)
+                .Append(user.Identifier)
+                .Append(Separator)
+                .Append(user.Name)
+                .Append(RightPart);
             return builder.ToString();
         }
 
-        public static bool TryDeconstruct(string text, out string identifier, out IdentifierType identifierType)
+        public static bool TryDeconstruct(string text, out ChatHubUser user)
         {
-            identifier = string.Empty;
-            identifierType = default;
-            
+            user = ChatHubUser.Empty;
+
             var match = IdentifierRegex.Match(text);
             if (!match.Success)
             {
                 return false;
             }
-            
+
             var parts = match.Value.Split(Separator);
-            if (!Enum.TryParse(parts.First(), false, out identifierType))
+            if (parts.Length != 3)
             {
                 return false;
             }
             
-            identifier = parts.Last();
-            return  true;
+            if (!Enum.TryParse(parts[0], false, out IdentifierType identifierType))
+            {
+                return false;
+            }
+
+            user = new ChatHubUser(identifierType, parts[1], parts[2]);
+            return true;
         }
     }
 }

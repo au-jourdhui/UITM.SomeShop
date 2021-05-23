@@ -28,20 +28,20 @@ namespace SomeShop.Web.Chat.SignalR
             return base.OnDisconnectedAsync(exception);
         }
 
-        public Task Register(string identifier, string type)
+        public Task Register(string identifier, string type, string name)
         {
             if (_userChatHubSession.Exists(this.ConnectionId))
             {
-                return SendBack(Methods.Receive, "Already connected!");
+                return SendBack(Methods.Info, "Already connected!");
             }
 
             if (!Enum.TryParse<IdentifierType>(type, true, out var identifierType))
             {
-                return SendBack(Methods.Receive, "Wrong identifier type!");
+                return SendBack(Methods.Info, "Wrong identifier type!");
             }
 
-            _userChatHubSession.Add(identifierType, identifier, this.ConnectionId);
-            return SendBack(Methods.Receive, "Successfully connected!");
+            _userChatHubSession.Add(identifierType, identifier, name, this.ConnectionId);
+            return SendBack(Methods.Info, "Successfully connected!");
         }
 
         public Task Send(string message)
@@ -58,7 +58,7 @@ namespace SomeShop.Web.Chat.SignalR
 
         private Task Spread(string message, string addressee = null)
         {
-            if (!_userChatHubSession.Exists(this.ConnectionId))
+            if (string.IsNullOrWhiteSpace(message) || !_userChatHubSession.Exists(this.ConnectionId))
             {
                 return Task.CompletedTask;
             }
@@ -76,15 +76,15 @@ namespace SomeShop.Web.Chat.SignalR
         {
             return _telegramBotClient.SendTextMessageAsync(
                 chatId,
-                ConstructRequest(message, chatHubUser.Identifier, chatHubUser.IdentifierType),
+                ConstructRequest(message, chatHubUser),
                 ParseMode.Markdown
             );
         }
 
-        private static string ConstructRequest(string message, string identifier, IdentifierType type)
+        private static string ConstructRequest(string message, ChatHubUser user)
         {
-            return $"{IdentifierStringBuilder.Construct(identifier, type)}{Environment.NewLine}" +
-                   $"{Environment.NewLine}" +
+            return $"{IdentifierStringBuilder.Construct(user)}" +
+                   $"{Environment.NewLine}{Environment.NewLine}" +
                    $"**Message:**{Environment.NewLine}" +
                    $"{message}";
         }
@@ -94,6 +94,7 @@ namespace SomeShop.Web.Chat.SignalR
         public static class Methods
         {
             public const string Receive = nameof(Receive);
+            public const string Info = nameof(Info);
         }
     }
 }

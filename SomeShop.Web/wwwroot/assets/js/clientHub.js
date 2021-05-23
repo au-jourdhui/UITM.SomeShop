@@ -1,20 +1,29 @@
+let connection;
 (async () => {
-    const connection = new signalR.HubConnectionBuilder()
+    connection = new signalR.HubConnectionBuilder()
         .withUrl("/chat")
         .configureLogging(signalR.LogLevel.Trace)
         .build();
 
-    connection.on("Receive", function (message, chatId) {
-        console.info(message, chatId);
-    });
-
     try {
         await connection.start();
         console.info("Connected to Chat Hub!");
-        await connection.send("Register", "+1234567890", "Phone");
-        await connection.send("Send", "Some message");
     } catch (error) {
         console.error(error);
     }
-    
+
+    try {
+        const userInfo = JSON.parse(window.localStorage.getItem('userInfo'));
+        await registerIntoHub(userInfo.email, userInfo.name);
+    } catch {
+        window.localStorage.removeItem('userInfo');
+    }
 })();
+
+const registerIntoHub = async (email, name) => {
+    await connection.send("Register", email, "Email", name);
+}
+
+const sendIntoHub = async (message) => {
+    await connection.send("Send", message);
+}

@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using SomeShop.DAL;
 using SomeShop.Web.Chat.SignalR;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -11,33 +13,42 @@ namespace SomeShop.Web.Chat.MessageHandlers
     {
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IUserChatHubSession _userChatHubSession;
+        private readonly IChatSession _chatSession;
+        private readonly Func<UnitOfWork> _uowFactory;
 
         private ChatHubUser _chatHubUser;
 
-        public RequestReplyMessageHandler(IHubContext<ChatHub> hubContext, IUserChatHubSession userChatHubSession)
+        public RequestReplyMessageHandler(
+            IHubContext<ChatHub> hubContext, 
+            IUserChatHubSession userChatHubSession,
+            IChatSession chatSession,
+            Func<UnitOfWork> uowFactory)
         {
             _hubContext = hubContext;
             _userChatHubSession = userChatHubSession;
+            _chatSession = chatSession;
+            _uowFactory = uowFactory;
         }
-        
+
         public Task<bool> CanHandle(Update update)
         {
             if (!ValidateReplyMessageType(update.Message.Type))
             {
                 return Task.FromResult(false);
             }
-            
+
             if (!(update.Message.ReplyToMessage is { } reply))
             {
                 return Task.FromResult(false);
             }
 
-            if (!IdentifierStringBuilder.TryDeconstruct(reply.Text, out var identifier, out var type))
+            if (!IdentifierStringBuilder.TryDeconstruct(reply.Text, out var user))
             {
                 return Task.FromResult(false);
             }
-            
-            _chatHubUser = _userChatHubSession.Users.FirstOrDefault(x => x.Identifier == identifier && x.IdentifierType == type);
+
+            _chatHubUser = _userChatHubSession.Users.FirstOrDefault(x => x.Identifier == user.Identifier
+                                                                         && x.IdentifierType == user.IdentifierType);
             return Task.FromResult(_chatHubUser is not null);
         }
 
@@ -48,8 +59,11 @@ namespace SomeShop.Web.Chat.MessageHandlers
             {
                 return false;
             }
+
+            var administrator = _chatSession.ChatAdministrators.FirstOrDefault(x => x.ChatId == update.Message.Chat.Id);
+            var user = _uowFactory().Users.FindById(administrator?.UserId);
             
-            await client.SendAsync(ChatHub.Methods.Receive, update.Message.Text);
+            await client.SendAsync(ChatHub.Methods.Receive, update.Message.Text, user?.FirstName ?? "Operator");
             return true;
         }
 

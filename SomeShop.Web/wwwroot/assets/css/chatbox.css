@@ -97,9 +97,11 @@ textarea::placeholder {
     border-radius: 50%;
 }
 .chatbox-popup .chatbox-popup__main {
+    max-height: 60vh;
+    overflow-y: auto;
     box-sizing: border-box;
     width: 100%;
-    padding: calc(2 * 16px) 16px;
+    padding: 16px;
     line-height: calc(16px + 16px / 2);
     color: #888;
     text-align: center;
@@ -141,9 +143,10 @@ textarea::placeholder {
     flex: 0 0 auto;
 }
 .chatbox-panel .chatbox-panel__main {
+    overflow-y: auto;
     box-sizing: border-box;
     width: 100%;
-    padding: calc(2 * 16px) 16px;
+    padding: 16px;
     line-height: calc(16px + 16px / 2);
     color: #888;
     text-align: center;

@@ -2,6 +2,7 @@ namespace SomeShop.Web.Chat.SignalR
 {
     public enum IdentifierType
     {
-        Phone
+        Unknown = -1,
+        Email
     }
 }

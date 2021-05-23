@@ -8,7 +8,7 @@ namespace SomeShop.Web.Chat.SignalR
 
         bool Exists(string connectionId);
 
-        void Add(IdentifierType type, string identifier, string connectionId);
+        void Add(IdentifierType type, string identifier, string name, string connectionId);
         
         bool Remove(string connectionId);
     }

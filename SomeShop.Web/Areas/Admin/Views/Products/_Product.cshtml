@@ -195,7 +195,6 @@
                 _el = $(el);
                 optionalParameters.push(_el.data('id'));
             });
-            debugger;
             $.ajax({
                 method: 'POST',
                 url: '@Url.Action("AddNewItem", "Products")',

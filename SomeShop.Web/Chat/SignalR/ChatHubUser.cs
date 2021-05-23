@@ -2,15 +2,26 @@ namespace SomeShop.Web.Chat.SignalR
 {
     public class ChatHubUser
     {
-        public ChatHubUser(IdentifierType identifierType, string identifier, string connectionId)
+        public static ChatHubUser Empty = new();
+
+        private ChatHubUser() { }
+            
+        public ChatHubUser(IdentifierType identifierType, string identifier, string name)
         {
             IdentifierType = identifierType;
             Identifier = identifier;
-            ConnectionId = connectionId;
+            Name = name;
         }
         
-        public IdentifierType IdentifierType { get; }
+        public ChatHubUser(IdentifierType identifierType, string identifier, string name, string connectionId) 
+            : this(identifierType, identifier, name)
+        {
+            ConnectionId = connectionId;
+        }
+
+        public IdentifierType IdentifierType { get; } = IdentifierType.Unknown;
         public string Identifier { get; }
         public string ConnectionId { get; }
+        public string Name { get; }
     }
 }
