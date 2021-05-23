@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SomeShop.Web.Chat;
+using SomeShop.Web.Chat.SignalR;
 using SomeShop.Web.Extensions;
 
 namespace SomeShop.Web
@@ -23,9 +25,10 @@ namespace SomeShop.Web
                 .AddUnitOfWork()
                 .AddMessageHandlers()
                 .AddChatSession()
-                .AddTelegramBotClient(Configuration);
+                .AddTelegramBotClient(Configuration)
+                .AddSignalR();
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -39,10 +42,18 @@ namespace SomeShop.Web
             app.UseStaticFiles();
             app.UseSession();
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(routes =>
             {
-                routes.MapRoute("areas", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                routes.MapHub<ChatHub>("/chat");
+                routes.MapControllerRoute(
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
+                routes.MapAreaControllerRoute(
+                    "areas",
+                    "areas",
+                    "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                );
             });
         }
     }

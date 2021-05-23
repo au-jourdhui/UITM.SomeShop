@@ -63,6 +63,7 @@
                                         </li>
                                         <li><a href="@Url.Action("Contact", "Home")">Contacts</a></li>
                                         <li><a href="@Url.Action("About", "Home")">About</a></li>
+                                        <li><a>Help</a></li>
                                     </ul>
                                 </nav>
                             </div>
@@ -416,6 +417,8 @@
             }
         });
     </script>
+    <script src="assets/js/signalr/dist/browser/signalr.js"></script>
+    <script src="assets/js/clientHub.js"></script>
     @RenderSection("Scripts", false)
 </body>
 </html>
