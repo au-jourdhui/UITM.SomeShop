@@ -7805,3 +7805,7 @@ button.swal2-confirm {
 a[href="http://somee.com"] {
     display: none;
 }
+
+.container-banner-wrapper {
+    padding: 35px 0;
+}

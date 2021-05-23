@@ -12,7 +12,7 @@ button.chatbox-open {
     width: 52px;
     height: 52px;
     color: #fff;
-    background-color: #8dc69b;
+    background-color: green;
     background-position: center center;
     background-repeat: no-repeat;
     box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.15);
@@ -28,7 +28,7 @@ button.chatbox-close {
     width: 52px;
     height: 52px;
     color: #fff;
-    background-color: #8dc69b;
+    background-color: green;
     background-position: center center;
     background-repeat: no-repeat;
     box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.15);
@@ -84,7 +84,7 @@ textarea::placeholder {
     width: 100%;
     padding: 16px;
     color: #fff;
-    background-color: #8dc69b;
+    background-color: green;
     align-items: center;
     justify-content: space-around;
     border-top-right-radius: 12px;
@@ -92,7 +92,7 @@ textarea::placeholder {
 }
 .chatbox-popup .chatbox-popup__header .chatbox-popup__avatar {
     margin-top: -32px;
-    background-color: #8dc69b;
+    background-color: green;
     border: 5px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
 }
@@ -135,7 +135,7 @@ textarea::placeholder {
     width: 100%;
     padding: 16px;
     color: #fff;
-    background-color: #8dc69b;
+    background-color: green;
     align-items: center;
     justify-content: space-around;
     flex: 0 0 auto;
