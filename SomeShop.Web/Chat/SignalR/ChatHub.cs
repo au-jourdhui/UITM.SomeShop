@@ -1,57 +1,99 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
 namespace SomeShop.Web.Chat.SignalR
 {
-    public class ChatHub : Hub
+    public class ChatHub : BaseHub
     {
         private readonly ITelegramBotClient _telegramBotClient;
         private readonly IChatSession _chatSession;
+        private readonly IUserChatHubSession _userChatHubSession;
 
-        public ChatHub(ITelegramBotClient telegramBotClient, IChatSession chatSession)
+        public ChatHub(
+            ITelegramBotClient telegramBotClient,
+            IChatSession chatSession,
+            IUserChatHubSession userChatHubSession)
         {
             _telegramBotClient = telegramBotClient;
             _chatSession = chatSession;
+            _userChatHubSession = userChatHubSession;
         }
 
-        public Task Send(string message, string identifier)
+        public override Task OnDisconnectedAsync(Exception exception)
         {
-            return Spread(message, identifier);
+            _userChatHubSession.Remove(this.ConnectionId);
+            return base.OnDisconnectedAsync(exception);
         }
 
-        public Task SendTo(string message, string identifier, string to)
+        public Task Register(string identifier, string type)
         {
-            return Spread(message, identifier, to);
+            if (_userChatHubSession.Exists(this.ConnectionId))
+            {
+                return SendBack(Methods.Receive, "Already connected!");
+            }
+
+            if (!Enum.TryParse<IdentifierType>(type, true, out var identifierType))
+            {
+                return SendBack(Methods.Receive, "Wrong identifier type!");
+            }
+
+            _userChatHubSession.Add(identifierType, identifier, this.ConnectionId);
+            return SendBack(Methods.Receive, "Successfully connected!");
         }
 
-        private Task Spread(string message, string identifier, string addressee = null)
+        public Task Send(string message)
         {
+            return Spread(message);
+        }
+
+        public Task SendTo(string message, string to)
+        {
+            return Spread(message, to);
+        }
+
+        #region Helpers
+
+        private Task Spread(string message, string addressee = null)
+        {
+            if (!_userChatHubSession.Exists(this.ConnectionId))
+            {
+                return Task.CompletedTask;
+            }
+            
+            var chatHubUser = _userChatHubSession.Users.First(x => x.ConnectionId == this.ConnectionId);
+            
             var chats = _chatSession.ChatAdministrators
                 .Where(x => !long.TryParse(addressee, out var chatId) || x.ChatId == chatId);
-            var sendMessageTasks = chats.Select(chat => SendRequest(chat.ChatId, message, identifier));
+            var sendMessageTasks = chats.Select(chat => SendRequest(chat.ChatId, message, chatHubUser));
 
             return Task.WhenAll(sendMessageTasks);
         }
 
-        private Task SendRequest(long chatId, string message, string identifier)
+        private Task SendRequest(long chatId, string message, ChatHubUser chatHubUser)
         {
             return _telegramBotClient.SendTextMessageAsync(
                 chatId,
-                ConstructRequest(message, identifier),
+                ConstructRequest(message, chatHubUser.Identifier, chatHubUser.IdentifierType),
                 ParseMode.Markdown
             );
         }
 
-        private static string ConstructRequest(string message, string identifier)
+        private static string ConstructRequest(string message, string identifier, IdentifierType type)
         {
-            return $"Identifier \\[{identifier}]{Environment.NewLine}" +
+            return $"{IdentifierStringBuilder.Construct(identifier, type)}{Environment.NewLine}" +
                    $"{Environment.NewLine}" +
                    $"**Message:**{Environment.NewLine}" +
                    $"{message}";
+        }
+
+        #endregion
+
+        public static class Methods
+        {
+            public const string Receive = nameof(Receive);
         }
     }
 }

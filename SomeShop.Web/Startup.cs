@@ -25,6 +25,7 @@ namespace SomeShop.Web
                 .AddUnitOfWork()
                 .AddMessageHandlers()
                 .AddChatSession()
+                .AddUserChatHubSession()
                 .AddTelegramBotClient(Configuration)
                 .AddSignalR();
 

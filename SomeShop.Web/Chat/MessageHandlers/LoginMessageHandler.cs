@@ -46,7 +46,7 @@ namespace SomeShop.Web.Chat.MessageHandlers
 
             var login = parts.Last();
             var password = parts.First();
-            if (!(_chatSession.Login(update.Message.Chat, login, password) is User user))
+            if (!(_chatSession.Login(update.Message.Chat, login, password) is { } user))
             {
                 return Task.FromResult(false);
             }

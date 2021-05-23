@@ -29,7 +29,7 @@ namespace SomeShop.Web.Chat
         public User Login(Telegram.Bot.Types.Chat chat, string email, string password)
         {
             var uow = _uowFactory();
-            if (_administrators.Find(x => x.ChatId == chat.Id) is ChatAdministrator signed)
+            if (_administrators.Find(x => x.ChatId == chat.Id) is { } signed)
             {
                 return uow.Users.FindById(signed.UserId);
             }
@@ -39,7 +39,7 @@ namespace SomeShop.Web.Chat
                 : null;
 
             if (user != null &&
-                uow.ChatAdministrators.FirstOrDefault(x => x.ChatId == chat.Id) is ChatAdministrator administrator)
+                uow.ChatAdministrators.FirstOrDefault(x => x.ChatId == chat.Id) is { } administrator)
             {
                 _administrators.Add(administrator);
             }

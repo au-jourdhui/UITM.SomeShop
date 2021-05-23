@@ -1,15 +1,20 @@
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/chat")
-    .configureLogging(signalR.LogLevel.Trace)
-    .build();
+(async () => {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chat")
+        .configureLogging(signalR.LogLevel.Trace)
+        .build();
 
-connection.on("Receive", function (message, chatId) {
+    connection.on("Receive", function (message, chatId) {
+        console.info(message, chatId);
+    });
 
-});
-
-connection
-    .start()
-    .then(() => {
-        console.log("Connected to Chat Hub!");
-    })
-    .catch(error => console.log(error));
+    try {
+        await connection.start();
+        console.info("Connected to Chat Hub!");
+        await connection.send("Register", "+1234567890", "Phone");
+        await connection.send("Send", "Some message");
+    } catch (error) {
+        console.error(error);
+    }
+    
+})();

@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RazorCompileOnBuild>true</RazorCompileOnBuild>
     <RazorCompileOnPublish>true</RazorCompileOnPublish>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
