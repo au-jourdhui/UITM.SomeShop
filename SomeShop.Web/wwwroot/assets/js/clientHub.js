@@ -3,7 +3,7 @@ const connection = new signalR.HubConnectionBuilder()
     .configureLogging(signalR.LogLevel.Trace)
     .build();
 
-hubConnection.on("Receive", function (message, chatId) {
+connection.on("Receive", function (message, chatId) {
 
 });
 
