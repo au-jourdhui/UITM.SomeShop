@@ -39,7 +39,6 @@
 
                     window.localStorage.setItem('userInfo', JSON.stringify({name, email}));
                     await registerIntoHub(email, name);
-                    return;
                 }
 
                 onScroll()
