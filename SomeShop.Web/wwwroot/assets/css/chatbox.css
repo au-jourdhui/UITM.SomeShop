@@ -5,6 +5,7 @@ button {
     outline: 0 !important;
     cursor: pointer;
 }
+
 button.chatbox-open {
     position: fixed;
     bottom: 0;
@@ -21,6 +22,7 @@ button.chatbox-open {
     cursor: pointer;
     margin: 16px;
 }
+
 button.chatbox-close {
     position: fixed;
     bottom: 0;
@@ -54,12 +56,15 @@ textarea {
     resize: none;
     overflow: hidden;
 }
+
 textarea::-moz-placeholder {
     color: #888;
 }
+
 textarea:-ms-input-placeholder {
     color: #888;
 }
+
 textarea::placeholder {
     color: #888;
 }
@@ -67,7 +72,7 @@ textarea::placeholder {
 .chatbox-popup {
     z-index: 1000;
     display: flex;
-    position: absolute;
+    position: fixed;
     box-shadow: 5px 5px 25px 0 rgba(46, 61, 73, 0.2);
     flex-direction: column;
     display: none;
@@ -78,6 +83,7 @@ textarea::placeholder {
     background-color: #fff;
     border-radius: 16px;
 }
+
 .chatbox-popup .chatbox-popup__header {
     box-sizing: border-box;
     display: flex;
@@ -90,12 +96,14 @@ textarea::placeholder {
     border-top-right-radius: 12px;
     border-top-left-radius: 12px;
 }
+
 .chatbox-popup .chatbox-popup__header .chatbox-popup__avatar {
     margin-top: -32px;
     background-color: green;
     border: 5px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
 }
+
 .chatbox-popup .chatbox-popup__main {
     max-height: 60vh;
     overflow-y: auto;
@@ -106,6 +114,7 @@ textarea::placeholder {
     color: #888;
     text-align: center;
 }
+
 .chatbox-popup .chatbox-popup__footer {
     box-sizing: border-box;
     display: flex;
@@ -121,7 +130,7 @@ textarea::placeholder {
 .chatbox-panel {
     z-index: 1000;
     display: flex;
-    position: absolute;
+    position: fixed;
     box-shadow: 5px 5px 25px 0 rgba(46, 61, 73, 0.2);
     flex-direction: column;
     display: none;
@@ -131,6 +140,7 @@ textarea::placeholder {
     width: 377px;
     background-color: #fff;
 }
+
 .chatbox-panel .chatbox-panel__header {
     box-sizing: border-box;
     display: flex;
@@ -142,6 +152,7 @@ textarea::placeholder {
     justify-content: space-around;
     flex: 0 0 auto;
 }
+
 .chatbox-panel .chatbox-panel__main {
     overflow-y: auto;
     box-sizing: border-box;
@@ -152,6 +163,7 @@ textarea::placeholder {
     text-align: center;
     flex: 1 1 auto;
 }
+
 .chatbox-panel .chatbox-panel__footer {
     box-sizing: border-box;
     display: flex;
@@ -161,4 +173,14 @@ textarea::placeholder {
     align-items: center;
     justify-content: space-around;
     flex: 0 0 auto;
+}
+
+@media screen and (max-width: 400px) {
+    .chatbox-popup {
+        width: 90%;
+    }
+
+    .chatbox-panel {
+        width: 100%;
+    }
 }
