@@ -54,16 +54,8 @@ namespace SomeShop.Web.Chat.MessageHandlers
 
         public async Task<bool> HandleAsync(Update update)
         {
-            var client = _hubContext.Clients.Client(_chatHubUser?.ConnectionId);
-            if (client is null)
-            {
-                return false;
-            }
-
             var administrator = _chatSession.ChatAdministrators.FirstOrDefault(x => x.ChatId == update.Message.Chat.Id);
-            var user = _uowFactory().Users.FindById(administrator?.UserId);
-            
-            await client.SendAsync(ChatHub.Methods.Receive, update.Message.Text, user?.FirstName ?? "Operator");
+            await _userChatHubSession.ReplyToUser(update.Message.Text, _chatHubUser?.ConnectionId, administrator);
             return true;
         }
 

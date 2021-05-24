@@ -2,7 +2,7 @@ namespace SomeShop.Web.Chat.SignalR
 {
     public class ChatHubUser
     {
-        public static ChatHubUser Empty = new();
+        public static readonly ChatHubUser Empty = new();
 
         private ChatHubUser() { }
             
@@ -21,7 +21,7 @@ namespace SomeShop.Web.Chat.SignalR
 
         public IdentifierType IdentifierType { get; } = IdentifierType.Unknown;
         public string Identifier { get; }
-        public string ConnectionId { get; }
+        public string ConnectionId { get; set; }
         public string Name { get; }
     }
 }

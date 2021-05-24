@@ -1,24 +1,14 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 
 namespace SomeShop.Web.Chat.SignalR
 {
     public class ChatHub : BaseHub
     {
-        private readonly ITelegramBotClient _telegramBotClient;
-        private readonly IChatSession _chatSession;
         private readonly IUserChatHubSession _userChatHubSession;
 
-        public ChatHub(
-            ITelegramBotClient telegramBotClient,
-            IChatSession chatSession,
-            IUserChatHubSession userChatHubSession)
+        public ChatHub(IUserChatHubSession userChatHubSession)
         {
-            _telegramBotClient = telegramBotClient;
-            _chatSession = chatSession;
             _userChatHubSession = userChatHubSession;
         }
 
@@ -46,50 +36,8 @@ namespace SomeShop.Web.Chat.SignalR
 
         public Task Send(string message)
         {
-            return Spread(message);
+            return _userChatHubSession.FollowOrStart(message, ConnectionId);
         }
-
-        public Task SendTo(string message, string to)
-        {
-            return Spread(message, to);
-        }
-
-        #region Helpers
-
-        private Task Spread(string message, string addressee = null)
-        {
-            if (string.IsNullOrWhiteSpace(message) || !_userChatHubSession.Exists(this.ConnectionId))
-            {
-                return Task.CompletedTask;
-            }
-            
-            var chatHubUser = _userChatHubSession.Users.First(x => x.ConnectionId == this.ConnectionId);
-            
-            var chats = _chatSession.ChatAdministrators
-                .Where(x => !long.TryParse(addressee, out var chatId) || x.ChatId == chatId);
-            var sendMessageTasks = chats.Select(chat => SendRequest(chat.ChatId, message, chatHubUser));
-
-            return Task.WhenAll(sendMessageTasks);
-        }
-
-        private Task SendRequest(long chatId, string message, ChatHubUser chatHubUser)
-        {
-            return _telegramBotClient.SendTextMessageAsync(
-                chatId,
-                ConstructRequest(message, chatHubUser),
-                ParseMode.Markdown
-            );
-        }
-
-        private static string ConstructRequest(string message, ChatHubUser user)
-        {
-            return $"{IdentifierStringBuilder.Construct(user)}" +
-                   $"{Environment.NewLine}{Environment.NewLine}" +
-                   $"**Message:**{Environment.NewLine}" +
-                   $"{message}";
-        }
-
-        #endregion
 
         public static class Methods
         {

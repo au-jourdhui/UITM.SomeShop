@@ -100,10 +100,8 @@ namespace SomeShop.Web.Chat
 
         private IEnumerable<IMessageHandler> GetMessageHandlers()
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-            {
-                return scope.ServiceProvider.GetServices<IMessageHandler>();
-            }
+            using var scope = _serviceScopeFactory.CreateScope();
+            return scope.ServiceProvider.GetServices<IMessageHandler>();
         }
     }
 }
