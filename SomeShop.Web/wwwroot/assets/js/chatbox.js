@@ -57,28 +57,27 @@
             chatbox(".chatbox-panel").fadeOut();
             chatbox(".chatbox-open").fadeIn();
         });
-        
+
         const textBox = chatbox(".text-to-chat-hub");
         const chatBody = chatbox(".chatbox-popup__main, .chatbox-panel__main");
-        
+
         textBox.keyup(e => {
-            if(e.keyCode === 13)
+            if (e.keyCode === 13)
                 textBox.trigger("enterKey");
         });
-        
-        let isFirst = true;
+
+        const clearIfFirst = () => {
+            chatBody.find(".chatbox-start-text").remove();
+        };
         const send = async () => {
             const message = textBox.val().trim() || textBox[1].value.trim();
-            
+
             if (!message) {
                 return;
             }
-            
-            if (isFirst) {
-                chatBody.find(".chatbox-start-text").remove();
-                isFirst = false;
-            }
-            
+
+            clearIfFirst();
+
             chatBody.append(`<p class='text-right'>${message}: <b>You</b></p>`);
             textBox.val(null);
             await sendIntoHub(message);
@@ -86,8 +85,9 @@
         chatbox(".send-to-chat-hub").click(send);
         textBox.bind("enterKey", send);
 
-        connection.on("Receive", function (message, chatId, name) {
-            chatBody.append(`<p class='text-left'><b class="text-primary">Operator</b>: ${message}</p>`);
+        connection.on("Receive", function (message, name) {
+            clearIfFirst();
+            chatBody.append(`<p class='text-left'><b class="text-primary">${name}</b>: ${message}</p>`);
         });
     });
 
