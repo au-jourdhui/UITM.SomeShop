@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace SomeShop.Web.Chat.SignalR.Messages
 {
-    public class ChatHubMessage
+    public abstract class ChatHubMessage
     {
         protected ChatHubMessage(string text, DateTime sentAt)
         {
@@ -14,6 +14,10 @@ namespace SomeShop.Web.Chat.SignalR.Messages
         public string Text { get; }
         
         public DateTime SentAt { get; }
+        
+
+        public abstract bool IsUser { get; }
+        public virtual string Name => string.Empty;
         
         public bool IsSent { get; private set; }
 

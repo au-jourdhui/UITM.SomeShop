@@ -5,11 +5,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using SomeShop.Web.Chat.SignalR;
+using SomeShop.Web.Chat.SignalR.Messages;
 
 namespace SomeShop.Web.Controllers
 {
     public class HomeController : BaseController
     {
+        private readonly IUserChatHubSession _userChatHubSession;
+
+        public HomeController(IUserChatHubSession userChatHubSession)
+        {
+            _userChatHubSession = userChatHubSession;
+        }
+        
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -77,6 +86,19 @@ namespace SomeShop.Web.Controllers
                 message = "An error occurred while sending! Contact Support.";
             }
             return Json(new { success, message });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult GetChatHistory(string identifier, string type)
+        {
+            if (!Enum.TryParse(type, false, out IdentifierType identifierType))
+            {
+                return NotFound(Array.Empty<ChatHubMessage>());
+            }
+
+            var history = _userChatHubSession.GetCurrentHistory(identifier, identifierType);
+            return Ok(history);
         }
     }
 }

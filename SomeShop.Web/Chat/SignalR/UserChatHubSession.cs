@@ -58,8 +58,9 @@ namespace SomeShop.Web.Chat.SignalR
             {
                 return default;
             }
-            
-            if (_histories.FirstOrDefault(x => !x.IsFinished && x.ChatHubUser.ConnectionId == connectionId) is { } history)
+
+            if (_histories.FirstOrDefault(x => !x.IsFinished && x.ChatHubUser.ConnectionId == connectionId) is
+                { } history)
             {
                 return await history.Push<ChatHubUser>(message);
             }
@@ -69,7 +70,9 @@ namespace SomeShop.Web.Chat.SignalR
             return history;
         }
 
-        public Task<IChatHubHistory> ReplyToUser(string message, string connectionId, ChatAdministrator chatAdministrator)
+        public Task<IChatHubHistory> ReplyToUser(string message,
+            string connectionId,
+            ChatAdministrator chatAdministrator)
         {
             if (!_users.Exists(x => x.ConnectionId == connectionId) ||
                 !(_histories.FirstOrDefault(x => !x.IsFinished && x.ChatHubUser.ConnectionId == connectionId) is
@@ -77,9 +80,17 @@ namespace SomeShop.Web.Chat.SignalR
             {
                 return Task.FromResult(default(IChatHubHistory));
             }
-            
+
             history.ChatAdministrator = chatAdministrator;
             return history.Push<ChatAdministrator>(message);
+        }
+
+        public IChatHubHistory GetCurrentHistory(string identifier, IdentifierType identifierType)
+        {
+            return _histories.FirstOrDefault(x =>
+                !x.IsFinished
+                && x.ChatHubUser?.Identifier == identifier
+                && x.ChatHubUser?.IdentifierType == identifierType);
         }
     }
 }

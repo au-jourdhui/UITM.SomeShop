@@ -21,20 +21,21 @@ namespace SomeShop.Web.Chat.SignalR.Messages
             : base(text, sentAt, history)
         {
             var provider = serviceProviderFactory();
-            
+
             _userChatHubSession = provider.GetRequiredService<IUserChatHubSession>();
             _chatSession = provider.GetRequiredService<IChatSession>();
             _telegramBotClient = provider.GetRequiredService<ITelegramBotClient>();
         }
 
-        public override Task SendAsync(string message)
+        public override async Task SendAsync(string message)
         {
             if (IsSent || History.IsFinished)
             {
-                return Task.CompletedTask;
+                return;
             }
 
-            return Spread(message, History.ChatAdministrator?.ChatId);
+            await Spread(message, History.ChatAdministrator?.ChatId);
+            Sent();
         }
 
         public override ChatHubUser SentBy => History.ChatHubUser;
@@ -43,7 +44,6 @@ namespace SomeShop.Web.Chat.SignalR.Messages
 
         private Task Spread(string message, long? chatId = null)
         {
-
             if (string.IsNullOrWhiteSpace(message) || !_userChatHubSession.Exists(ConnectionId))
             {
                 return Task.CompletedTask;
@@ -77,5 +77,7 @@ namespace SomeShop.Web.Chat.SignalR.Messages
                    $"**Message:**{Environment.NewLine}" +
                    $"{message}";
         }
+
+        public override bool IsUser => true;
     }
 }

@@ -2,6 +2,46 @@
     const chatbox = jQuery;
 
     chatbox(() => {
+        const clearIfFirst = () => {
+            chatBody.find(".chatbox-start-text").remove();
+        };
+        const addMessageBlock = (message) => {
+            chatBody.append(`<p class='text-right'>${message}: <b>You</b></p>`);
+        }
+        const addAnswerBlock = (message, name) => {
+            chatBody.append(`<p class='text-left'><b class="text-primary">${name}</b>: ${message}</p>`);
+        }
+        const initialSetup = () => {
+            const userInfo = window.localStorage.getItem('userInfo');
+            if (!userInfo){
+                return;
+            }
+            const {email} = JSON.parse(userInfo);
+            if (!email) {
+                return;
+            }
+            
+            chatbox.ajax({
+                url: '/Home/GetChatHistory',
+                method: 'GET',
+                data: {type: 'Email', identifier: email},
+                success: (history) => {
+                    if (history?.length) {
+                        clearIfFirst();
+                    }
+                    
+                    for (const item of history) {
+                        if (item.isUser) {
+                            addMessageBlock(item.text);
+                        } else{
+                            addAnswerBlock(item.text, item.name);
+                        }
+                    }
+                }
+            });
+        }
+        initialSetup();
+
         chatbox(".chatbox-open").click(async () => {
                 let userInfo;
                 try {
@@ -65,10 +105,6 @@
             if (e.keyCode === 13)
                 textBox.trigger("enterKey");
         });
-
-        const clearIfFirst = () => {
-            chatBody.find(".chatbox-start-text").remove();
-        };
         const send = async () => {
             const message = textBox.val().trim() || textBox[1].value.trim();
 
@@ -78,7 +114,7 @@
 
             clearIfFirst();
 
-            chatBody.append(`<p class='text-right'>${message}: <b>You</b></p>`);
+            addMessageBlock(message);
             textBox.val(null);
             await sendIntoHub(message);
         };
@@ -87,7 +123,7 @@
 
         connection.on("Receive", function (message, name) {
             clearIfFirst();
-            chatBody.append(`<p class='text-left'><b class="text-primary">${name}</b>: ${message}</p>`);
+            addAnswerBlock(message, name);
         });
     });
 
