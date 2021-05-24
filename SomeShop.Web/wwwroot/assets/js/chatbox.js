@@ -80,11 +80,11 @@
             }
             
             chatBody.append(`<p class='text-right'>${message}: <b>You</b></p>`);
+            textBox.val(null);
             await sendIntoHub(message);
         };
         chatbox(".send-to-chat-hub").click(send);
         textBox.bind("enterKey", send);
-        textBox.bind("enterKey", () => textBox.val(null));
 
         connection.on("Receive", function (message, chatId, name) {
             chatBody.append(`<p class='text-left'><b class="text-primary">Operator</b>: ${message}</p>`);
