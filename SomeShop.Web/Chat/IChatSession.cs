@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SomeShop.DAL.Models;
 
 namespace SomeShop.Web.Chat
@@ -10,5 +11,7 @@ namespace SomeShop.Web.Chat
         User Login(Telegram.Bot.Types.Chat chat, string email, string password);
         
         void Register(Telegram.Bot.Types.Chat chat, User user);
+
+        Task SpreadAsync(string message, string connectionId);
     }
 }

@@ -85,12 +85,33 @@ namespace SomeShop.Web.Chat.SignalR
             return history.Push<ChatAdministrator>(message);
         }
 
+        public Task<IChatHubHistory> ReplyToUser(string message, IChatHubHistory history) =>
+            ReplyToUser(message, history.ChatHubUser.ConnectionId, history.ChatAdministrator);
+
         public IChatHubHistory GetCurrentHistory(string identifier, IdentifierType identifierType)
         {
             return _histories.FirstOrDefault(x =>
                 !x.IsFinished
-                && x.ChatHubUser?.Identifier == identifier
-                && x.ChatHubUser?.IdentifierType == identifierType);
+                && x.ChatHubUser.Identifier == identifier
+                && x.ChatHubUser.IdentifierType == identifierType);
+        }
+
+        public IChatHubHistory GetCurrentHistory(string connectionId) =>
+            _histories.FirstOrDefault(x => !x.IsFinished && x.ChatHubUser.ConnectionId == connectionId);
+
+        public IChatHubHistory GetCurrentHistory(long chatId) =>
+            _histories.FirstOrDefault(x => !x.IsFinished && x.ChatAdministrator.ChatId == chatId);
+
+        public bool HasOpenConversation(long chatId) =>
+            _histories.Any(x => !x.IsFinished && x.ChatAdministrator?.ChatId == chatId);
+
+        public async Task<bool> FinishConversation(long chatId, string message)
+        {
+            if (GetCurrentHistory(chatId) is not { } history)
+                return false;
+
+            (await ReplyToUser(message, history)).Finish();
+            return true;
         }
     }
 }

@@ -100,11 +100,13 @@
 
         const textBox = chatbox(".text-to-chat-hub");
         const chatBody = chatbox(".chatbox-popup__main, .chatbox-panel__main");
-
-        textBox.keyup(e => {
-            if (e.keyCode === 13)
+        textBox.on("keypress", e => {
+            if (e.keyCode === 13){
+                e.preventDefault();
                 textBox.trigger("enterKey");
+            }
         });
+        
         const send = async () => {
             const message = textBox.val().trim() || textBox[1].value.trim();
 

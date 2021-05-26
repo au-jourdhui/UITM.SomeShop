@@ -1,9 +1,8 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
-using SomeShop.DAL;
 using SomeShop.Web.Chat.SignalR;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -11,23 +10,20 @@ namespace SomeShop.Web.Chat.MessageHandlers
 {
     public class RequestReplyMessageHandler : IMessageHandler
     {
-        private readonly IHubContext<ChatHub> _hubContext;
         private readonly IUserChatHubSession _userChatHubSession;
         private readonly IChatSession _chatSession;
-        private readonly Func<UnitOfWork> _uowFactory;
+        private readonly ITelegramBotClient _telegramBotClient;
 
         private ChatHubUser _chatHubUser;
 
         public RequestReplyMessageHandler(
-            IHubContext<ChatHub> hubContext, 
             IUserChatHubSession userChatHubSession,
             IChatSession chatSession,
-            Func<UnitOfWork> uowFactory)
+            ITelegramBotClient telegramBotClient)
         {
-            _hubContext = hubContext;
             _userChatHubSession = userChatHubSession;
             _chatSession = chatSession;
-            _uowFactory = uowFactory;
+            _telegramBotClient = telegramBotClient;
         }
 
         public Task<bool> CanHandle(Update update)
@@ -54,8 +50,27 @@ namespace SomeShop.Web.Chat.MessageHandlers
 
         public async Task<bool> HandleAsync(Update update)
         {
-            var administrator = _chatSession.ChatAdministrators.FirstOrDefault(x => x.ChatId == update.Message.Chat.Id);
-            await _userChatHubSession.ReplyToUser(update.Message.Text, _chatHubUser?.ConnectionId, administrator);
+            var chatId = update.Message.Chat.Id;
+            var administrator = _chatSession.ChatAdministrators.FirstOrDefault(x => x.ChatId == chatId);
+
+            var tasks = new List<Task>(
+                new[]
+                {
+                    _userChatHubSession.ReplyToUser(update.Message.Text, _chatHubUser.ConnectionId, administrator)
+                }
+            );
+            
+            if (!_userChatHubSession.HasOpenConversation(chatId))
+            {
+                tasks.Add(
+                    _telegramBotClient.SendTextMessageAsync(
+                        chatId,
+                        $"Chat with *{_chatHubUser.Name}* has been started!"
+                    )
+                );
+            }
+
+            await Task.WhenAll(tasks);
             return true;
         }
 

@@ -49,6 +49,11 @@ namespace SomeShop.Web.Chat.SignalR.Messages
 
         public void Finish()
         {
+            if (IsFinished)
+            {
+                throw new InvalidOperationException("History already closed!");
+            }
+            
             IsFinished = true;
         }
 
