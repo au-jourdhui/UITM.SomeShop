@@ -63,7 +63,7 @@
         $(document).ready(function () {
             $('#login').click(function () {
                 $.ajax({
-                    url: '@Url.Action("Login", "Home")',
+                    url: '@Url.Action("Login", "Home", new { area = "Admin" })',
                     method: 'POST',
                     data: { login: $('#inputLogin').val(), password: $('#inputPassword').val() },
                     success: function (data) {

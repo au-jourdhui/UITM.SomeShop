@@ -48,13 +48,12 @@ namespace SomeShop.Web
             {
                 routes.MapHub<ChatHub>("/chat");
                 routes.MapControllerRoute(
-                    "default",
-                    "{controller=Home}/{action=Index}/{id?}");
-                routes.MapAreaControllerRoute(
                     "areas",
-                    "admin",
                     "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
+                routes.MapControllerRoute(
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
