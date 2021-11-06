@@ -52,7 +52,7 @@ namespace SomeShop.Web
                     "{controller=Home}/{action=Index}/{id?}");
                 routes.MapAreaControllerRoute(
                     "areas",
-                    "areas",
+                    "admin",
                     "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
             });
